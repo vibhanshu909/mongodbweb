@@ -4,14 +4,41 @@ import GraphQLJSON from 'graphql-type-json'
 import { MongoClient } from 'mongodb'
 import {
   asNexusMethod,
+  inputObjectType,
   makeSchema,
   mutationType,
+  objectType,
   queryType,
   stringArg,
 } from 'nexus'
 import * as path from 'path'
 
 const json = asNexusMethod(GraphQLJSON, 'json')
+
+const Database = objectType({
+  name: 'Database',
+  definition(t) {
+    t.string('name')
+    t.boolean('empty')
+  },
+})
+const Collection = objectType({
+  name: 'Collection',
+  definition(t) {
+    t.string('name')
+    t.int('count')
+  },
+})
+
+export const FindInputType = inputObjectType({
+  name: 'FindInputType',
+  definition(t) {
+    t.json('query', { nullable: true })
+    t.int('skip', { default: 0 })
+    t.int('limit', { default: 20 })
+    t.json('sort', { nullable: true })
+  },
+})
 
 const Query = queryType({
   definition(t) {
@@ -35,6 +62,101 @@ const Query = queryType({
           await client.close()
         }
         return false
+      },
+    })
+    t.list.field('listDatabases', {
+      type: Database,
+      nullable: true,
+      args: {
+        uri: stringArg({ nullable: false }),
+      },
+      resolve: async (_, { uri }) => {
+        const client = new MongoClient(uri, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        })
+        try {
+          await client.connect()
+          const dbList = await client
+            .db()
+            .admin()
+            .listDatabases()
+          return dbList.databases
+        } catch (error) {
+          throw new Error('Failed to connect')
+          return null
+        } finally {
+          await client.close()
+        }
+      },
+    })
+    t.list.field('listCollections', {
+      type: Collection,
+      nullable: true,
+      args: {
+        uri: stringArg({ nullable: false }),
+        database: stringArg({ nullable: false }),
+      },
+      resolve: async (_, { uri, database }) => {
+        const client = new MongoClient(uri, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        })
+        try {
+          await client.connect()
+          const db = client.db(database)
+          let listCollections = await db.listCollections().toArray()
+
+          const listCount = await Promise.all(
+            listCollections.map(collection =>
+              db.collection(collection.name).countDocuments(),
+            ),
+          )
+          listCollections = listCollections.map((collection, index) => ({
+            name: collection.name,
+            count: listCount[index],
+          }))
+          return listCollections
+        } catch (error) {
+          throw new Error('Failed to connect')
+        } finally {
+          await client.close()
+        }
+      },
+    })
+    t.json('query', {
+      args: {
+        uri: stringArg({ nullable: false }),
+        database: stringArg({ nullable: false }),
+        collection: stringArg({ nullable: false }),
+        params: FindInputType,
+      },
+      async resolve(_, { uri, database, collection, params }) {
+        const { query, ...rest } =
+          params ||
+          ({
+            query: {},
+            limit: 20,
+            skip: 0,
+            sort: {},
+          } as any)
+        const client = new MongoClient(uri, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        })
+        try {
+          await client.connect()
+          const db = client.db(database)
+          return db
+            .collection(collection)
+            .find(query, { ...(rest as any), batchSize: rest.limit })
+            .toArray()
+        } catch (error) {
+          throw new Error('Failed to connect')
+          // return null
+        } finally {
+          await client.close()
+        }
       },
     })
   },

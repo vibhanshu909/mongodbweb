@@ -34,10 +34,7 @@ export interface ICollectionContext {
 }
 interface ICollectionContextPayload {
   servers: ICollectionContext[]
-  collectionData: {
-    ok: boolean
-    results: Array<any>
-  } | null
+  collectionData: Array<any> | null
 }
 // setPayload: React.Dispatch<React.SetStateAction<ICollectionContextPayload>>;
 export const CollectionContext = React.createContext({
@@ -100,9 +97,11 @@ class MyApp extends App<any, any, { hasError: boolean }> {
     return (
       <ApolloProvider client={apollo}>
         <LocalStorageProvider name="servers">
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
+          <CollectionContextProvider>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </CollectionContextProvider>
         </LocalStorageProvider>
       </ApolloProvider>
     )

@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useRef } from 'react'
-import { FaSpinner } from 'react-icons/fa'
 import { useCheckServerQueryLazyQuery } from '../generated/graphql'
+import CircularLoader from './CircularLoader'
 import { LocalStorageContext } from './LocalStorageContext/LocalStorageContext'
 
 export const AddServerForm = () => {
   const { setPayload } = useContext(LocalStorageContext)
   const inputRef = useRef(null)
   const formRef = useRef(null)
-  const [checkServer, { data, loading }] = useCheckServerQueryLazyQuery({
+  const [checkServer, { data, loading, error }] = useCheckServerQueryLazyQuery({
     fetchPolicy: 'network-only',
   })
   useEffect(() => {
@@ -54,6 +54,9 @@ export const AddServerForm = () => {
             type="text"
             placeholder="mongodb://<username>:<password>@<host>/<db_name>"
           />
+          {(error || (data && !data.checkServer)) && (
+            <span className="text-red-400">Failed to connect</span>
+          )}
         </div>
         <div className="">
           <button
@@ -62,7 +65,7 @@ export const AddServerForm = () => {
               'opacity-50 cursor-not-allowed'}`}
             type="submit"
           >
-            {loading && <FaSpinner className="inline" />}Add
+            {loading && <CircularLoader />} <span> Add</span>
           </button>
         </div>
       </div>

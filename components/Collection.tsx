@@ -3,10 +3,10 @@ import { CollectionContext } from '../pages/_app'
 
 export const Collection: React.FC = () => {
   const { payload } = useContext(CollectionContext)
-  if (payload.collectionData?.results.length) {
+  if (payload.collectionData?.length) {
     return (
       <div className="flex flex-col">
-        {payload.collectionData?.results.map((document, key) => (
+        {payload.collectionData?.map((document, key) => (
           <div className="m-2" key={key}>
             <pre className="bg-gray-700 p-1">
               {JSON.stringify(document, null, 2)}

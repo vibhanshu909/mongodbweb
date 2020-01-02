@@ -22,12 +22,26 @@ declare global {
 }
 
 export interface NexusGenInputs {
+  FindInputType: { // input type
+    limit?: number | null; // Int
+    query?: any | null; // JSON
+    skip?: number | null; // Int
+    sort?: any | null; // JSON
+  }
 }
 
 export interface NexusGenEnums {
 }
 
 export interface NexusGenRootTypes {
+  Collection: { // root type
+    count: number; // Int!
+    name: string; // String!
+  }
+  Database: { // root type
+    empty: boolean; // Boolean!
+    name: string; // String!
+  }
   Mutation: {};
   Query: {};
   String: string;
@@ -39,14 +53,26 @@ export interface NexusGenRootTypes {
 }
 
 export interface NexusGenAllTypes extends NexusGenRootTypes {
+  FindInputType: NexusGenInputs['FindInputType'];
 }
 
 export interface NexusGenFieldTypes {
+  Collection: { // field return type
+    count: number; // Int!
+    name: string; // String!
+  }
+  Database: { // field return type
+    empty: boolean; // Boolean!
+    name: string; // String!
+  }
   Mutation: { // field return type
     addServer: any; // JSON!
   }
   Query: { // field return type
     checkServer: boolean; // Boolean!
+    listCollections: NexusGenRootTypes['Collection'][] | null; // [Collection!]
+    listDatabases: NexusGenRootTypes['Database'][] | null; // [Database!]
+    query: any; // JSON!
     servers: string; // String!
   }
 }
@@ -61,6 +87,19 @@ export interface NexusGenArgTypes {
     checkServer: { // args
       uri: string; // String!
     }
+    listCollections: { // args
+      database: string; // String!
+      uri: string; // String!
+    }
+    listDatabases: { // args
+      uri: string; // String!
+    }
+    query: { // args
+      collection: string; // String!
+      database: string; // String!
+      params?: NexusGenInputs['FindInputType'] | null; // FindInputType
+      uri: string; // String!
+    }
   }
 }
 
@@ -69,9 +108,9 @@ export interface NexusGenAbstractResolveReturnTypes {
 
 export interface NexusGenInheritedFields {}
 
-export type NexusGenObjectNames = "Mutation" | "Query";
+export type NexusGenObjectNames = "Collection" | "Database" | "Mutation" | "Query";
 
-export type NexusGenInputNames = never;
+export type NexusGenInputNames = "FindInputType";
 
 export type NexusGenEnumNames = never;
 

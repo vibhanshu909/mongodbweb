@@ -1,21 +1,25 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 interface ICollapse {
   title: string
-  open?: boolean
 }
+
 const Collapse: React.FC<ICollapse> = props => {
-  const { title, children, open: defaultOpen = false } = props
-  const [open, setOpen] = useState(defaultOpen)
+  const { title, children } = props
   return (
-    <details open={open} onClick={() => setOpen(!open)}>
+    <details>
       <summary
         className="focus:outline-none focus:bg-gray-800 hover:bg-gray-700 break-words"
         title={title}
       >
         {title}
       </summary>
-      {children}
+      <div className="ml-2">{children}</div>
+      <style jsx>{`
+        details[open] > summary {
+          background-color: rgba(255, 255, 255, 0.2);
+        }
+      `}</style>
     </details>
   )
 }
