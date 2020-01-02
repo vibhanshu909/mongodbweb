@@ -4,10 +4,10 @@ import { FaSpinner } from 'react-icons/fa'
 const CircularLoader = () => {
   return (
     <>
-      <span className="spinMe">
+      <span className='spinMe'>
         <FaSpinner />
       </span>
-      <style jsx>{`
+      <style jsx={true}>{`
         .spinMe {
           display: inline-block;
           animation-name: spin;

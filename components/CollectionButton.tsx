@@ -28,13 +28,13 @@ export const CollectionButton: React.FC<{
     }
   }, [data])
   if (error) {
-    return <p className="text-red-400">{error.graphQLErrors[0].message}</p>
+    return <p className='text-red-400'>{error.graphQLErrors[0].message}</p>
   }
   const fireQuery = () => query()
   return (
     <button
       disabled={loading}
-      className="text-white w-full px-2 focus:bg-gray-600 focus:outline-none"
+      className='text-white w-full px-2 focus:bg-gray-600 focus:outline-none'
       onDoubleClick={fireQuery}
     >
       <Row>
@@ -44,7 +44,7 @@ export const CollectionButton: React.FC<{
         ) : (
           <>
             <span>{count}</span>
-            <button onClick={fireQuery} className="ml-2 my-auto">
+            <button onClick={fireQuery} className='ml-2 my-auto'>
               <FaArrowCircleRight />
             </button>
           </>

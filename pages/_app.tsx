@@ -34,7 +34,7 @@ export interface ICollectionContext {
 }
 interface ICollectionContextPayload {
   servers: ICollectionContext[]
-  collectionData: Array<any> | null
+  collectionData: any[] | null
 }
 // setPayload: React.Dispatch<React.SetStateAction<ICollectionContextPayload>>;
 export const CollectionContext = React.createContext({
@@ -85,8 +85,8 @@ class MyApp extends App<any, any, { hasError: boolean }> {
     if (this.state.hasError) {
       // You can render any custom fallback UI
       return (
-        <div className="min-h-screen bg-gray-900">
-          <h1 className="text-center my-auto text-red-400">
+        <div className='min-h-screen bg-gray-900'>
+          <h1 className='text-center my-auto text-red-400'>
             Something went wrong.
           </h1>
         </div>
@@ -96,7 +96,7 @@ class MyApp extends App<any, any, { hasError: boolean }> {
     const { apollo } = this.props as any
     return (
       <ApolloProvider client={apollo}>
-        <LocalStorageProvider name="servers">
+        <LocalStorageProvider name='servers'>
           <CollectionContextProvider>
             <Layout>
               <Component {...pageProps} />

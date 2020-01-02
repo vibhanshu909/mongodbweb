@@ -149,7 +149,7 @@ const Query = queryType({
           const db = client.db(database)
           return db
             .collection(collection)
-            .find(query, { ...(rest as any), batchSize: rest.limit })
+            .find(query, { ...rest, batchSize: rest.limit })
             .toArray()
         } catch (error) {
           throw new Error('Failed to connect')

@@ -1,8 +1,8 @@
-import React from "react";
+import React from 'react'
 
-const Table: React.FC<{ data: Array<any> }> = ({ data }) => {
+const Table: React.FC<{ data: any[] }> = ({ data }) => {
   if (data.length) {
-    const headers = Object.keys(data[0]);
+    const headers = Object.keys(data[0])
     return (
       <table>
         <thead>
@@ -15,7 +15,7 @@ const Table: React.FC<{ data: Array<any> }> = ({ data }) => {
             <tr key={key}>
               {Object.values(row).map((cell, lkey) => (
                 <td key={lkey}>
-                  {typeof cell === "object"
+                  {typeof cell === 'object'
                     ? cell instanceof Array
                       ? cell.length
                       : (cell as any).$value
@@ -25,7 +25,7 @@ const Table: React.FC<{ data: Array<any> }> = ({ data }) => {
             </tr>
           ))}
         </tbody>
-        <style jsx>{`
+        <style jsx={true}>{`
           table {
             border: 1px solid white;
           }
@@ -36,10 +36,10 @@ const Table: React.FC<{ data: Array<any> }> = ({ data }) => {
           }
         `}</style>
       </table>
-    );
+    )
   } else {
-    return null;
+    return null
   }
-};
+}
 
-export default Table;
+export default Table
