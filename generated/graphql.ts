@@ -9,58 +9,71 @@ export interface Scalars {
   Boolean: boolean,
   Int: number,
   Float: number,
-  /** The `Upload` scalar type represents a file upload. */
-  Upload: any,
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+  JSON: any,
 }
 
 
-export enum ICacheControlScope {
-  Public = 'PUBLIC',
-  Private = 'PRIVATE'
+export interface IMutation {
+   __typename?: 'Mutation',
+  addServer: Scalars['JSON'],
+}
+
+
+export interface IMutationAddServerArgs {
+  uri: Scalars['String']
 }
 
 export interface IQuery {
    __typename?: 'Query',
-  sayHello?: Maybe<Scalars['String']>,
+  servers: Scalars['String'],
+  checkServer: Scalars['Boolean'],
 }
 
 
-export type ISayHelloQueryVariables = {};
+export interface IQueryCheckServerArgs {
+  uri: Scalars['String']
+}
+
+export type ICheckServerQueryQueryVariables = {
+  uri: Scalars['String']
+};
 
 
-export type ISayHelloQuery = (
+export type ICheckServerQueryQuery = (
   { __typename?: 'Query' }
-  & Pick<IQuery, 'sayHello'>
+  & Pick<IQuery, 'checkServer'>
 );
 
 
-export const SayHelloDocument = gql`
-    query SayHello {
-  sayHello
+export const CheckServerQueryDocument = gql`
+    query CheckServerQuery($uri: String!) {
+  checkServer(uri: $uri)
 }
     `;
 
 /**
- * __useSayHelloQuery__
+ * __useCheckServerQueryQuery__
  *
- * To run a query within a React component, call `useSayHelloQuery` and pass it any options that fit your needs.
- * When your component renders, `useSayHelloQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `useCheckServerQueryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCheckServerQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useSayHelloQuery({
+ * const { data, loading, error } = useCheckServerQueryQuery({
  *   variables: {
+ *      uri: // value for 'uri'
  *   },
  * });
  */
-export function useSayHelloQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ISayHelloQuery, ISayHelloQueryVariables>) {
-        return ApolloReactHooks.useQuery<ISayHelloQuery, ISayHelloQueryVariables>(SayHelloDocument, baseOptions);
+export function useCheckServerQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ICheckServerQueryQuery, ICheckServerQueryQueryVariables>) {
+        return ApolloReactHooks.useQuery<ICheckServerQueryQuery, ICheckServerQueryQueryVariables>(CheckServerQueryDocument, baseOptions);
       }
-export function useSayHelloLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ISayHelloQuery, ISayHelloQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<ISayHelloQuery, ISayHelloQueryVariables>(SayHelloDocument, baseOptions);
+export function useCheckServerQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ICheckServerQueryQuery, ICheckServerQueryQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ICheckServerQueryQuery, ICheckServerQueryQueryVariables>(CheckServerQueryDocument, baseOptions);
         }
-export type SayHelloQueryHookResult = ReturnType<typeof useSayHelloQuery>;
-export type SayHelloLazyQueryHookResult = ReturnType<typeof useSayHelloLazyQuery>;
-export type SayHelloQueryResult = ApolloReactCommon.QueryResult<ISayHelloQuery, ISayHelloQueryVariables>;
+export type CheckServerQueryQueryHookResult = ReturnType<typeof useCheckServerQueryQuery>;
+export type CheckServerQueryLazyQueryHookResult = ReturnType<typeof useCheckServerQueryLazyQuery>;
+export type CheckServerQueryQueryResult = ApolloReactCommon.QueryResult<ICheckServerQueryQuery, ICheckServerQueryQueryVariables>;

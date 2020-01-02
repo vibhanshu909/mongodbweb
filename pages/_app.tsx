@@ -1,6 +1,7 @@
 import { ApolloProvider } from '@apollo/react-hooks'
 import App from 'next/app'
 import React, { useState } from 'react'
+import LocalStorageProvider from '../components/LocalStorageContext/LocalStorageProvider'
 import Layout from '../Layout'
 import withData from '../lib/apollo-client'
 import '../styles/main.css'
@@ -98,11 +99,11 @@ class MyApp extends App<any, any, { hasError: boolean }> {
     const { apollo } = this.props as any
     return (
       <ApolloProvider client={apollo}>
-        <CollectionContextProvider>
+        <LocalStorageProvider name="servers">
           <Layout>
             <Component {...pageProps} />
           </Layout>
-        </CollectionContextProvider>
+        </LocalStorageProvider>
       </ApolloProvider>
     )
   }

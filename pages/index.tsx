@@ -1,22 +1,26 @@
 import { NextPage } from 'next'
-import React from 'react'
+import React, { useContext } from 'react'
+import NoSSR from 'react-no-ssr'
+import { AddServerForm } from '../components/AddServerForm'
+import Collapse from '../components/Collapse'
 import { Collection } from '../components/Collection'
+import { LocalStorageContext } from '../components/LocalStorageContext/LocalStorageContext'
 
-const AddServerForm = () => {
-  return <form></form>
-}
 const Index: NextPage = () => {
-  // const { payload, setPayload } = useContext(CollectionContext)
-  // useEffect(() => {
-  //   setPayload(prev => ({ ...prev, servers: data }))
-  // }, [data])
+  const { payload } = useContext(LocalStorageContext)
+  console.log('servers', payload)
   return (
     <div>
       <div className="my-3">
-        <AddServerForm />
+        <NoSSR>
+          <AddServerForm />
+        </NoSSR>
       </div>
       <div className="flex">
-        <div className="self-start mx-2 bg-gray-800 p-4 sticky top-0">
+        <div className="self-start mx-2 bg-gray-800 p-4 sticky top-0 max-w-sm">
+          {payload?.servers?.map((server: string) => {
+            return <Collapse title={server} />
+          })}
           {/* {payload.servers.map((connections, key) => {
           return (
             <Details

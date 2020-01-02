@@ -46,6 +46,7 @@ export interface NexusGenFieldTypes {
     addServer: any; // JSON!
   }
   Query: { // field return type
+    checkServer: boolean; // Boolean!
     servers: string; // String!
   }
 }
@@ -53,6 +54,11 @@ export interface NexusGenFieldTypes {
 export interface NexusGenArgTypes {
   Mutation: {
     addServer: { // args
+      uri: string; // String!
+    }
+  }
+  Query: {
+    checkServer: { // args
       uri: string; // String!
     }
   }

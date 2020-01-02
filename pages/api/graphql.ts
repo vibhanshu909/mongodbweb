@@ -20,6 +20,23 @@ const Query = queryType({
         return `Hello World`
       },
     })
+    t.boolean('checkServer', {
+      args: { uri: stringArg({ nullable: false }) },
+      resolve: async (_, { uri }) => {
+        const client = new MongoClient(uri, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        })
+        try {
+          await client.connect()
+          return true
+        } catch (error) {
+        } finally {
+          await client.close()
+        }
+        return false
+      },
+    })
   },
 })
 

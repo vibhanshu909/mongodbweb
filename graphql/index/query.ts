@@ -1,7 +1,7 @@
 import gql from 'graphql-tag'
 
-export const HelloQuery = gql`
-  query SayHello {
-    sayHello
+export const CheckServerQuery = gql`
+  query CheckServerQuery($uri: String!) {
+    checkServer(uri: $uri)
   }
 `
