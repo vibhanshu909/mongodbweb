@@ -4,7 +4,10 @@ import CircularLoader from './CircularLoader'
 import Collapse from './Collapse'
 import ListCollections from './ListCollections'
 
-const ListDatabases: React.FC<{ server: string }> = ({ server }) => {
+const ListDatabases: React.FC<{ server: string; onDelete?: () => void }> = ({
+  server,
+  onDelete,
+}) => {
   const [
     listDatabases,
     { data, loading, error },
@@ -23,7 +26,7 @@ const ListDatabases: React.FC<{ server: string }> = ({ server }) => {
   }
   const url = new URL(server).pathname.split('@')[1]
   return (
-    <Collapse title={url}>
+    <Collapse title={url} onDelete={onDelete}>
       {data?.listDatabases?.map((database, key) => {
         if (database.empty) {
           return <p key={key}>{database.name}</p>

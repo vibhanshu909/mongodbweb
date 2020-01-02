@@ -2,10 +2,11 @@ import React from 'react'
 
 interface ICollapse {
   title: string
+  onDelete?: () => void
 }
 
 const Collapse: React.FC<ICollapse> = props => {
-  const { title, children } = props
+  const { title, children, onDelete } = props
   return (
     <details>
       <summary
