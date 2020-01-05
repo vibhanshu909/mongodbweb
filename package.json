@@ -22,6 +22,7 @@
     "next-with-apollo": "^4.3.0",
     "nexus": "^0.12.0-rc.5",
     "react": "^16.12.0",
+    "react-contextmenu": "^2.13.0",
     "react-dom": "^16.12.0",
     "react-icons": "^3.8.0",
     "react-no-ssr": "^1.1.0"

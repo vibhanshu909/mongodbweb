@@ -1,14 +1,11 @@
 import React from 'react'
-import { DeleteButton } from '../components/DeleteButton'
+import { ContextMenu } from '../components/ContextMenu'
 
 const Test = () => {
   return (
-    <div className='flex justify-between'>
-      <div>testing</div>
-      <div>
-        <DeleteButton />
-      </div>
-    </div>
+    <ContextMenu menuItems={[{ key: <div>testing</div>, value: 'testing' }]}>
+      <div>trigger</div>
+    </ContextMenu>
   )
 }
 
