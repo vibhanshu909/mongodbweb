@@ -10,7 +10,7 @@ const Collapse: React.FC<ICollapse> = props => {
   return (
     <details>
       <summary
-        className='focus:outline-none focus:bg-gray-800 hover:bg-gray-700 break-words'
+        className='focus:outline-none focus:bg-gray-800 hover:bg-gray-700 break-all'
         title={title}
       >
         {title}

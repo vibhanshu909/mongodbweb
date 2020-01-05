@@ -1,8 +1,10 @@
+import dynamic from 'next/dynamic'
 import React, { useEffect } from 'react'
 import { useListDatabasesQueryLazyQuery } from '../generated/graphql'
 import CircularLoader from './CircularLoader'
 import Collapse from './Collapse'
-import ListCollections from './ListCollections'
+
+const ListCollections = dynamic(() => import('./ListCollections'))
 
 const ListDatabases: React.FC<{ server: string; onDelete?: () => void }> = ({
   server,
@@ -33,11 +35,7 @@ const ListDatabases: React.FC<{ server: string; onDelete?: () => void }> = ({
         }
         return (
           <Collapse key={key} title={database.name}>
-            <ListCollections
-              key={key}
-              server={server}
-              database={database.name}
-            />
+            <ListCollections server={server} database={database.name} />
           </Collapse>
         )
       })}
