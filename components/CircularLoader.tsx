@@ -1,10 +1,10 @@
 import React from 'react'
 import { FaSpinner } from 'react-icons/fa'
 
-const CircularLoader = () => {
+const CircularLoader: React.FC<{ className?: string }> = ({ className }) => {
   return (
     <>
-      <span className='spinMe'>
+      <span className={`spinMe ${className}`}>
         <FaSpinner />
       </span>
       <style jsx={true}>{`

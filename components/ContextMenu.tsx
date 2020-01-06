@@ -6,6 +6,7 @@ import {
 } from 'react-contextmenu'
 
 interface IContextMenu {
+  onMenuItemSelected: (value: any) => void
   menuItems: Array<{
     key: any
     value: any
@@ -17,9 +18,9 @@ export const ContextMenu: React.FC<IContextMenu> = props => {
   useEffect(() => {
     setId(Math.random().toString())
   }, [])
-  const { children, menuItems } = props
+  const { children, menuItems, onMenuItemSelected } = props
   const handleClick = (e: any, data: any) => {
-    console.log(data.foo)
+    onMenuItemSelected(data)
   }
   return (
     <>
@@ -30,7 +31,7 @@ export const ContextMenu: React.FC<IContextMenu> = props => {
         {menuItems.map((menu, key) => (
           <MenuItem
             key={key}
-            data={menu.value}
+            data={{ value: menu.value }}
             onClick={handleClick}
             className='p-2 hover:bg-gray-200 cursor-pointer'
           >

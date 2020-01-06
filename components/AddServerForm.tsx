@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useRef } from 'react'
 import { useCheckServerQueryLazyQuery } from '../generated/graphql'
-import CircularLoader from './CircularLoader'
+import { LoadingButton } from './LoadingButton'
 import { LocalStorageContext } from './LocalStorageContext/LocalStorageContext'
 
 export const AddServerForm = () => {
-  const { setPayload } = useContext(LocalStorageContext)
+  const { payload, setPayload } = useContext(LocalStorageContext)
   const inputRef = useRef(null)
   const formRef = useRef(null)
   const [checkServer, { data, loading, error }] = useCheckServerQueryLazyQuery({
@@ -17,7 +17,11 @@ export const AddServerForm = () => {
           ...prev,
         }
         const newServer = (inputRef.current! as HTMLInputElement).value
-        if (prev.servers && !prev.servers.includes(newServer)) {
+        const url = new URL(newServer)
+        if (
+          prev.servers &&
+          !prev.servers.some((s: string) => s.includes(url.pathname))
+        ) {
           newState.servers = [...prev.servers, newServer]
         } else {
           newState.servers = [newServer]
@@ -58,15 +62,8 @@ export const AddServerForm = () => {
             <span className='text-red-400'>Failed to connect</span>
           )}
         </div>
-        <div className=''>
-          <button
-            disabled={loading}
-            className={`bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${loading &&
-              'opacity-50 cursor-not-allowed'}`}
-            type='submit'
-          >
-            {loading && <CircularLoader />} <span> Add</span>
-          </button>
+        <div>
+          <LoadingButton loading={loading}>Add</LoadingButton>
         </div>
       </div>
     </form>
