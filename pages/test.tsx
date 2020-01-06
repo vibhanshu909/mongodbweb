@@ -1,12 +1,8 @@
 import React from 'react'
-import { ContextMenu } from '../components/ContextMenu'
+import EnhancedMenu from '../components/EnhancedMenu'
 
 const Test = () => {
-  return (
-    <ContextMenu menuItems={[{ key: <div>testing</div>, value: 'testing' }]}>
-      <div>trigger</div>
-    </ContextMenu>
-  )
+  return <EnhancedMenu />
 }
 
 export default Test

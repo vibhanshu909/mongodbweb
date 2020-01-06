@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { FaTrash } from 'react-icons/fa'
 import { Button } from './Button'
+import { IconButton } from './IconButton'
 
 export const DeleteButton: React.FC<React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -24,13 +25,13 @@ export const DeleteButton: React.FC<React.DetailedHTMLProps<
   }
   return (
     <>
-      <button
+      <IconButton
         className='rounded-full p-3 text-red-600 focus:outline-none'
         {...props}
         onClick={handleOpen}
       >
         <FaTrash />
-      </button>
+      </IconButton>
       {open && (
         <div className='w-screen h-screen fixed inset-0' onClick={handleClose}>
           <div className='flex h-full dialog-container'>
@@ -61,10 +62,7 @@ export const DeleteButton: React.FC<React.DetailedHTMLProps<
       )}
       <style jsx={true}>{`
         .dialog-container {
-          background-color: rgba(255, 255, 255, 0.25);
-        }
-        button:hover {
-          background-color: rgba(155, 0, 0, 0.2);
+          background-color: rgba(0, 0, 0, 0.25);
         }
       `}</style>
     </>

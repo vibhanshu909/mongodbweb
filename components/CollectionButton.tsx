@@ -1,9 +1,10 @@
 import React, { useContext, useEffect } from 'react'
-import { FaArrowCircleRight } from 'react-icons/fa'
 import { useQueryQueryLazyQuery } from '../generated/graphql'
 import { CollectionContext } from '../pages/_app'
 import CircularLoader from './CircularLoader'
 import { ContextMenu } from './ContextMenu'
+import EnhancedMenu, { MenuItem } from './EnhancedMenu'
+
 export const CollectionButton: React.FC<{
   server: string
   database: string
@@ -54,9 +55,10 @@ export const CollectionButton: React.FC<{
                   <span>{count}</span>
                 </div>
                 <div className='mx-1'>
-                  <button onClick={fireQuery} className='ml-2 my-auto'>
-                    <FaArrowCircleRight />
-                  </button>
+                  <EnhancedMenu>
+                    <MenuItem onClick={fireQuery}>View data</MenuItem>
+                    <MenuItem>Delete</MenuItem>
+                  </EnhancedMenu>
                 </div>
               </div>
             )}

@@ -11,6 +11,11 @@ const Layout: React.FC = ({ children }) => {
           content='A simple web application that allows you to connect to your mongodb server and perform CRUD operations.'
         />
         <script
+          data-ad-client='ca-pub-5720468470042472'
+          async={true}
+          src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js'
+        />
+        <script
           dangerouslySetInnerHTML={{
             __html: `
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
