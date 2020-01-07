@@ -1,42 +1,40 @@
 import React from 'react'
 import { useClickoutsideListenerRef } from '../hooks/useClickoutsideListenerRef'
-import { Button } from './Button'
 
 interface IDialog {
-  title: any
   onClose: () => void
-  onPositive: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
-  onNegative?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
-  positiveBtn?: React.FC
-  nagativeBtn?: React.FC
+  position?: 'center' | 'left' | 'top' | 'right' | 'bottom'
 }
-const Dialog: React.FC<IDialog> = props => {
-  const {
-    title,
-    children,
-    onClose,
-    onPositive,
-    onNegative = onClose,
-    positiveBtn = (
-      <Button onClick={onPositive} color='danger'>
-        Yes
-      </Button>
-    ),
-    nagativeBtn = <Button onClick={onNegative}>No</Button>,
-  } = props
+
+export const Dialog: React.FC<IDialog> = props => {
+  const { onClose, children } = props
+  let { position = 'center' } = props
   const ref = useClickoutsideListenerRef(onClose)
+  switch (position as IDialog['position']) {
+    case 'center':
+      position = 'm-auto'
+      break
+    case 'left':
+      position = 'mr-auto h-full'
+      break
+    case 'top':
+      position = 'mb-auto h-full'
+      break
+    case 'right':
+      position = 'ml-auto h-full'
+      break
+    case 'bottom':
+      position = 'mt-auto h-full'
+      break
+  }
   return (
-    <div className='w-screen h-screen fixed inset-0 z-50'>
-      <div className='flex h-full dialog-container'>
-        <div ref={ref} className='bg-white p-3 md:w-1/3 m-auto rounded'>
-          <div>
-            <h1 className='text-gray-900 text-2xl'>{title}</h1>
-          </div>
-          <div className='my-5 '>{children}</div>
-          <div className='flex justify-between items-center'>
-            <div className='mr-2'>{nagativeBtn}</div>
-            <div>{positiveBtn}</div>
-          </div>
+    <div className='w-screen h-screen fixed inset-0 z-50 dialog-container'>
+      <div className='flex h-full'>
+        <div
+          ref={ref}
+          className={`bg-white p-3 md:w-1/3 max-w-3/4 ${position} rounded overflow-auto`}
+        >
+          {children}
         </div>
       </div>
 
@@ -48,5 +46,3 @@ const Dialog: React.FC<IDialog> = props => {
     </div>
   )
 }
-
-export default Dialog

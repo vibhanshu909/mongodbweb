@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FaTrash } from 'react-icons/fa'
-import Dialog from './Dialog'
+import { ConfirmDialog } from './ConfirmDialog'
 import { IconButton } from './IconButton'
 
 export const DeleteButton: React.FC<React.DetailedHTMLProps<
@@ -33,13 +33,13 @@ export const DeleteButton: React.FC<React.DetailedHTMLProps<
         <FaTrash />
       </IconButton>
       {open && (
-        <Dialog
+        <ConfirmDialog
           onClose={handleClose}
           onPositive={handleDelete}
           title='Are you sure?'
         >
           This action can't be undone.
-        </Dialog>
+        </ConfirmDialog>
       )}
     </>
   )

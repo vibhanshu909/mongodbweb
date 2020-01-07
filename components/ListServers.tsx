@@ -36,5 +36,3 @@ export const ListServers = () => {
     </>
   )
 }
-
-export default ListServers
