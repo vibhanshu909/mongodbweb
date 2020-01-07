@@ -15,7 +15,7 @@ export const IconButton: React.FC<React.DetailedHTMLProps<
       </button>
       <style jsx={true}>{`
         button:hover {
-          background-color: rgba(255, 255, 255, 0.2);
+          background-color: rgba(150, 150, 150, 0.2);
         }
       `}</style>
     </>

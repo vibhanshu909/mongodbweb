@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef } from 'react'
+import { FaPlus } from 'react-icons/fa'
 import { useCheckServerQueryLazyQuery } from '../generated/graphql'
 import { LoadingButton } from './LoadingButton'
 import { LocalStorageContext } from './LocalStorageContext/LocalStorageContext'
@@ -35,7 +36,7 @@ export const AddServerForm = () => {
   return (
     <form
       ref={formRef}
-      className='text-white border border-gray-700 rounded px-8 pt-6 pb-8 mb-4'
+      className='border border-gray-200 rounded p-2'
       onSubmit={async e => {
         e.preventDefault()
         const uri = (inputRef.current! as HTMLInputElement).value
@@ -63,7 +64,9 @@ export const AddServerForm = () => {
           )}
         </div>
         <div>
-          <LoadingButton loading={loading}>Add</LoadingButton>
+          <LoadingButton loading={loading} className='text-white'>
+            <FaPlus className='inline-block' /> Add
+          </LoadingButton>
         </div>
       </div>
     </form>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FaTrash } from 'react-icons/fa'
-import { Button } from './Button'
+import Dialog from './Dialog'
 import { IconButton } from './IconButton'
 
 export const DeleteButton: React.FC<React.DetailedHTMLProps<
@@ -33,38 +33,14 @@ export const DeleteButton: React.FC<React.DetailedHTMLProps<
         <FaTrash />
       </IconButton>
       {open && (
-        <div className='w-screen h-screen fixed inset-0' onClick={handleClose}>
-          <div className='flex h-full dialog-container'>
-            <div className='bg-white p-3 md:w-1/3 text-black m-auto rounded'>
-              <div>
-                <h1 className='text-gray-900 text-2xl'>Are you sure?</h1>
-              </div>
-              <p className='my-5 '>This action can't be undone.</p>
-              <div className='flex justify-between items-center'>
-                <div className='mr-2'>
-                  <Button onClick={handleClose} className='text-white'>
-                    No
-                  </Button>
-                </div>
-                <div>
-                  <Button
-                    onClick={handleDelete}
-                    className='text-white'
-                    color='danger'
-                  >
-                    Yes
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Dialog
+          onClose={handleClose}
+          onPositive={handleDelete}
+          title='Are you sure?'
+        >
+          This action can't be undone.
+        </Dialog>
       )}
-      <style jsx={true}>{`
-        .dialog-container {
-          background-color: rgba(0, 0, 0, 0.25);
-        }
-      `}</style>
     </>
   )
 }

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { FaEllipsisV } from 'react-icons/fa'
 import { IconButton } from './IconButton'
 
-const Content: React.FC<{ onClose: any }> = ({ onClose, children }) => {
+export const Content: React.FC<{ onClose: any }> = ({ onClose, children }) => {
   const ref = useRef(null)
   const escapeListener = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') {
