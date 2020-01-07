@@ -27,7 +27,7 @@ export const ContextMenu: React.FC<IContextMenu> = props => {
       <div className='cursor-pointer'>
         <ContextMenuTrigger id={id}>{children}</ContextMenuTrigger>
       </div>
-      <LibContextMenu id={id} className='rounded py-1 bg-white text-black'>
+      <LibContextMenu id={id} className='rounded py-1'>
         {menuItems.map((menu, key) => (
           <MenuItem
             key={key}

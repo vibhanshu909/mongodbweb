@@ -1,34 +1,14 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { FaEllipsisV } from 'react-icons/fa'
+import { useClickoutsideListenerRef } from '../hooks/useClickoutsideListenerRef'
 import { IconButton } from './IconButton'
 
-export const Content: React.FC<{ onClose: any }> = ({ onClose, children }) => {
-  const ref = useRef(null)
-  const escapeListener = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onClose()
-    }
-  }, [])
-  const clickListener = useCallback(
-    (e: MouseEvent) => {
-      if (!(ref.current! as any).contains(e.target)) {
-        onClose?.()
-      }
-    },
-    [ref.current],
-  )
-  useEffect(() => {
-    document.addEventListener('click', clickListener)
-    document.addEventListener('keyup', escapeListener)
-    return () => {
-      document.removeEventListener('click', clickListener)
-      document.removeEventListener('keyup', escapeListener)
-    }
-  }, [onClose])
+const Content: React.FC<{ onClose: () => void }> = ({ onClose, children }) => {
+  const ref = useClickoutsideListenerRef(onClose)
   return (
     <div
       ref={ref}
-      className='absolute inset-auto bg-white text-gray-900 py-2 rounded'
+      className={`absolute bg-white text-gray-900 py-2 rounded border-2 shadow-xl z-10 w-32`}
     >
       {children}
     </div>
@@ -52,9 +32,8 @@ export const MenuItem: React.FC<{ onClick?: any; className?: string }> = ({
 
 const EnhancedMenu: React.FC = ({ children }) => {
   const [open, setOpen] = useState(false)
-
   return (
-    <>
+    <div className='relative'>
       <IconButton
         className='rounded-full p-3 focus:outline-none'
         onClick={() => {
@@ -63,16 +42,8 @@ const EnhancedMenu: React.FC = ({ children }) => {
       >
         <FaEllipsisV />
       </IconButton>
-      {open && (
-        <Content
-          onClose={() => {
-            setOpen(false)
-          }}
-        >
-          {children}
-        </Content>
-      )}
-    </>
+      {open && <Content onClose={() => setOpen(false)}>{children}</Content>}
+    </div>
   )
 }
 

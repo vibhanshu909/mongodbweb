@@ -18,24 +18,17 @@ const Dialog: React.FC<IDialog> = props => {
     onPositive,
     onNegative = onClose,
     positiveBtn = (
-      <Button onClick={onPositive} className='text-white' color='danger'>
+      <Button onClick={onPositive} color='danger'>
         Yes
       </Button>
     ),
-    nagativeBtn = (
-      <Button onClick={onNegative} className='text-white'>
-        No
-      </Button>
-    ),
+    nagativeBtn = <Button onClick={onNegative}>No</Button>,
   } = props
   const ref = useClickoutsideListenerRef(onClose)
   return (
     <div className='w-screen h-screen fixed inset-0 z-50'>
       <div className='flex h-full dialog-container'>
-        <div
-          ref={ref}
-          className='bg-white p-3 md:w-1/3 text-black m-auto rounded'
-        >
+        <div ref={ref} className='bg-white p-3 md:w-1/3 m-auto rounded'>
           <div>
             <h1 className='text-gray-900 text-2xl'>{title}</h1>
           </div>

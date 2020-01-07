@@ -54,7 +54,7 @@ export const AddServerForm = () => {
           </label>
           <input
             ref={inputRef}
-            className='text-black shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline'
+            className='shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline'
             id='username'
             type='text'
             placeholder='mongodb://<username>:<password>@<host>/<db_name>'
@@ -64,7 +64,7 @@ export const AddServerForm = () => {
           )}
         </div>
         <div>
-          <LoadingButton loading={loading} className='text-white'>
+          <LoadingButton loading={loading}>
             <FaPlus className='inline-block' /> Add
           </LoadingButton>
         </div>

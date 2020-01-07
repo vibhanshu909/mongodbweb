@@ -40,7 +40,7 @@ export const Button: React.FC<IButtonProps> = props => {
   return (
     <button
       {...rest}
-      className={`${bgColor} font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${className}`}
+      className={`${bgColor} text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${className}`}
     >
       {children}
     </button>

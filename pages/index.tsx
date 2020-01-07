@@ -10,7 +10,7 @@ import { LocalStorageContext } from '../components/LocalStorageContext/LocalStor
 const Index: NextPage = () => {
   const { payload, setPayload } = useContext(LocalStorageContext)
   return (
-    <div className='bg-gray-900 text-white'>
+    <div className='bg-gray-900'>
       <div className='my-3'>
         <NoSSR>
           <AddServerForm />

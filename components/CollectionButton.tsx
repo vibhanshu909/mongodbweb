@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from 'react'
 import { useQueryQueryLazyQuery } from '../generated/graphql'
 import { CollectionContext } from '../pages/_app'
 import CircularLoader from './CircularLoader'
-import { ContextMenu } from './ContextMenu'
+// import { ContextMenu } from './ContextMenu'
 import EnhancedMenu, { MenuItem } from './EnhancedMenu'
 
 export const CollectionButton: React.FC<{
@@ -33,13 +33,14 @@ export const CollectionButton: React.FC<{
   }
   const fireQuery = () => query()
   return (
-    <ContextMenu
-      menuItems={[{ key: 'key', value: 'value' }]}
-      onMenuItemSelected={value => console.log(value)}
-    >
+    // <ContextMenu
+    //   menuItems={[{ key: 'key', value: 'value' }]}
+    //   onMenuItemSelected={value => console.log(value)}
+    // >
+    <div>
       <button
         disabled={loading}
-        className='select-none text-white w-full px-2 focus:bg-gray-600 focus:outline-none'
+        className='select-none w-full px-2 focus:bg-blue-600 focus:outline-none'
         onDoubleClick={fireQuery}
       >
         <div className='flex flex-no-wrap justify-between items-baseline'>
@@ -65,6 +66,7 @@ export const CollectionButton: React.FC<{
           </div>
         </div>
       </button>
-    </ContextMenu>
+    </div>
+    // </ContextMenu>
   )
 }
