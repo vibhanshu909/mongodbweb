@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { FaBars, FaDonate } from 'react-icons/fa'
+import { FaBars } from 'react-icons/fa'
 import { AddServerForm } from '../components/AddServerForm'
-import { Button } from '../components/Button'
 import { Dialog } from '../components/Dialog'
+import { DonateUs } from '../components/DonateUs'
 import { IconButton } from '../components/IconButton'
 import { ListServers } from '../components/ListServers'
 import Logo from '../public/images/logo.png'
@@ -16,22 +16,15 @@ export const Sidebar = () => {
       </IconButton>
       {open && (
         <Dialog position='left' onClose={() => setOpen(false)}>
-          {/* <div className='h-full min-w-1/3 border-r-2 border-gray-200 hidden md:block overflow-y-auto'> */}
-          {/* <div className='h-full overflow-auto'> */}
           <div className='h-full flex flex-col justify-between'>
             <div>
               <AddServerForm />
               <ListServers />
             </div>
             <div className='border-t-2 border-gray-200'>
-              <Button color='success' className='mt-5 w-full'>
-                <FaDonate className='inline mr-2 focus:outline-none' /> Donate
-                Us
-              </Button>
+              <DonateUs />
             </div>
           </div>
-          {/* </div> */}
-          {/* </div> */}
         </Dialog>
       )}
     </>
@@ -60,9 +53,7 @@ const Header = () => {
             </div>
           </div>
           <div className='hidden md:block'>
-            <Button color='success'>
-              <FaDonate className='inline mr-2 focus:outline-none' /> Donate Us
-            </Button>
+            <DonateUs />
           </div>
         </div>
       </div>

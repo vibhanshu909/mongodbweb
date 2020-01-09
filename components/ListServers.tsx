@@ -32,7 +32,7 @@ export const ListServers = () => {
             </div>
           </div>
         )
-      })}
+      }) || <p>No Servers Found!</p>}
     </>
   )
 }

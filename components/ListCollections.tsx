@@ -34,7 +34,7 @@ const ListCollections: React.FC<{
             count={collection.count}
           />
         )
-      })}
+      }) || <p>No Collections Found!</p>}
     </>
   )
 }

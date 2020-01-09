@@ -52,7 +52,9 @@ export const CollectionButton: React.FC<{
                 </div>
                 <div className='mx-1'>
                   <EnhancedMenu>
-                    <MenuItem onClick={fireQuery}>View data</MenuItem>
+                    {count ? (
+                      <MenuItem onClick={fireQuery}>View data</MenuItem>
+                    ) : null}
                     <MenuItem>Delete</MenuItem>
                   </EnhancedMenu>
                 </div>

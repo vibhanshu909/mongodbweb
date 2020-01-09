@@ -57,8 +57,7 @@
   },
   "scripts": {
     "dev": "next",
-    "build": "next build",
-    "export": "next export",
+    "build": "next build && next export",
     "start": "next start",
     "format": "prettier --write \"./**/*.ts\"",
     "lint": "tslint -p tsconfig.json -c tslint.json",
@@ -68,5 +67,8 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "engines": {
+    "node": "12.x"
+  }
 }

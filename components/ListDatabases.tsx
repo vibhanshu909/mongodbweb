@@ -28,7 +28,7 @@ const ListDatabases: React.FC<{ server: string; onDelete?: () => void }> = ({
   }
   const url = new URL(server).pathname.split('@')[1]
   return (
-    <Collapse title={url} onDelete={onDelete}>
+    <Collapse title={url}>
       {data?.listDatabases?.map((database, key) => {
         if (database.empty) {
           return <p key={key}>{database.name}</p>
@@ -38,7 +38,7 @@ const ListDatabases: React.FC<{ server: string; onDelete?: () => void }> = ({
             <ListCollections server={server} database={database.name} />
           </Collapse>
         )
-      })}
+      }) || <p>No Databases Found!</p>}
     </Collapse>
   )
 }
