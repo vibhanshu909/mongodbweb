@@ -32,11 +32,12 @@ export interface ICollectionContext {
     }>
   }>
 }
+
 interface ICollectionContextPayload {
   servers: ICollectionContext[]
   collectionData: any[] | null
 }
-// setPayload: React.Dispatch<React.SetStateAction<ICollectionContextPayload>>;
+
 export const CollectionContext = React.createContext({
   payload: {
     servers: [],
@@ -64,26 +65,11 @@ class MyApp extends App<any, any, { hasError: boolean }> {
     super(props)
     this.state = { hasError: false }
   }
-  // Only uncomment this method if you have blocking data requirements for
-  // every single page in your application. This disables the ability to
-  // perform automatic static optimization, causing every page in your app to
-  // be server-side rendered.
-  //
-  // static async getInitialProps(appContext) {
-  //   // calls page's `getInitialProps` and fills `appProps.pageProps`
-  //   const appProps = await App.getInitialProps(appContext);
-  //
-  //   return { ...appProps }
-  // }
   componentDidCatch(error: Error, info: any) {
-    // Display fallback UI
     this.setState({ hasError: true })
-    // You can also log the error to an error reporting service
-    // logErrorToMyService(error, info);
   }
   render() {
     if (this.state.hasError) {
-      // You can render any custom fallback UI
       return (
         <div className='min-h-screen bg-gray-900'>
           <h1 className='text-center my-auto text-red-400'>
