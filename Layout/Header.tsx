@@ -45,7 +45,9 @@ const Header = () => {
                 <img src={Logo} alt='logo' className='h-12' />
               </div>
               <div>
-                <h1 className='text-xl'>MongoDB Web</h1>
+                <h1 className='text-xl'>
+                  MongoDB Web <sup className='text-sm text-red-500'>[beta]</sup>
+                </h1>
                 <p className='text-sm text-gray-500'>
                   A simple web based mongodb studio
                 </p>

@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
-import { DeleteButton } from './DeleteButton'
 import ListDatabases from './ListDatabases'
 import { LocalStorageContext } from './LocalStorageContext/LocalStorageContext'
+import { RemoveButton } from './RemoveButton'
 
 export const ListServers = () => {
   const { payload, setPayload } = useContext(LocalStorageContext)
@@ -17,8 +17,8 @@ export const ListServers = () => {
               <ListDatabases server={server} />
             </div>
             <div className='mx-1'>
-              <DeleteButton
-                title={'Delete'}
+              <RemoveButton
+                title={'Remove Server'}
                 onClick={() => {
                   setPayload((prev: any) => {
                     const newPayload = {
