@@ -1,64 +1,11 @@
 import { ApolloProvider } from '@apollo/react-hooks'
 import App from 'next/app'
-import React, { useState } from 'react'
+import React from 'react'
+import { CollectionContextProvider } from '../components/CollectionContext/CollectionContextProvider'
 import LocalStorageProvider from '../components/LocalStorageContext/LocalStorageProvider'
 import Layout from '../Layout'
 import withData from '../lib/apollo-client'
 import '../styles/main.css'
-
-export interface ICollectionContext {
-  name: string
-  size: number
-  databases: Array<{
-    name: string
-    size: number
-    dataSize: number
-    avgObjSize: number | null
-    storageSize: number
-    totalIndexSize: number
-    empty: boolean
-    collections: Array<{
-      name: string
-      size: number
-      dataSize: number
-      avgObjSize: number | null
-      storageSize: number
-      capped: boolean
-      nIndexes: number
-      totalIndexSize: number
-      indexSizes: {
-        [key: string]: number
-      }
-    }>
-  }>
-}
-
-interface ICollectionContextPayload {
-  servers: ICollectionContext[]
-  collectionData: any[] | null
-}
-
-export const CollectionContext = React.createContext({
-  payload: {
-    servers: [],
-    collectionData: null,
-  },
-  setPayload: () => null,
-} as { payload: ICollectionContextPayload; setPayload: React.Dispatch<React.SetStateAction<ICollectionContextPayload>> })
-
-export const CollectionContextProvider: React.FC = ({ children }) => {
-  const [data, setData] = useState({
-    servers: [],
-    collectionData: null,
-  })
-  return (
-    <CollectionContext.Provider
-      value={{ payload: data, setPayload: setData as any }}
-    >
-      {children}
-    </CollectionContext.Provider>
-  )
-}
 
 class MyApp extends App<any, any, { hasError: boolean }> {
   constructor(props: any) {
