@@ -57,7 +57,7 @@
   },
   "scripts": {
     "dev": "next",
-    "build": "next build && next export",
+    "build": "next build",
     "start": "next start",
     "format": "prettier --write \"./**/*.ts\"",
     "lint": "tslint -p tsconfig.json -c tslint.json",
