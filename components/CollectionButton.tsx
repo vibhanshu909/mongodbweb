@@ -1,15 +1,22 @@
 import React, { useContext } from 'react'
+import { IFindInputType } from '../generated/graphql'
 import { CollectionContext } from './CollectionContext/CollectionContext'
 import EnhancedMenu, { MenuItem } from './EnhancedMenu'
+
+const defaultParams = {
+  limit: 20,
+  query: '{}',
+  skip: 0,
+  sort: '{}',
+} as IFindInputType
 
 export const CollectionButton: React.FC<{
   server: string
   database: string
   collection: string
-  params?: any
   count: number
 }> = props => {
-  const { server, database, collection, params, count } = props
+  const { server, database, collection, count } = props
   const { setPayload } = useContext(CollectionContext)
   const fireQuery = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     e.preventDefault()
@@ -32,6 +39,8 @@ export const CollectionButton: React.FC<{
             server,
             database,
             collection,
+            count,
+            params: { ...defaultParams },
           },
         ],
       }

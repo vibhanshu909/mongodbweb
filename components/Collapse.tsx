@@ -9,7 +9,6 @@ const Collapse: React.FC<ICollapse> = props => {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   const toggleHandler = useCallback(e => {
-    console.log('toggle')
     e.stopPropagation()
     setOpen(!open)
   }, [])

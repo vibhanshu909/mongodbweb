@@ -1,10 +1,17 @@
-import React, { useContext, useState } from 'react'
-import { FaCheckCircle } from 'react-icons/fa'
+import React, { useContext, useRef, useState } from 'react'
+import {
+  FaAngleDoubleLeft,
+  FaAngleDoubleRight,
+  FaAngleLeft,
+  FaAngleRight,
+  FaSearch,
+} from 'react-icons/fa'
 import { IFindInputType, useQueryQueryQuery } from '../generated/graphql'
-import { Button } from './Button'
 import CircularLoader from './CircularLoader'
 import { CollectionContext } from './CollectionContext/CollectionContext'
+import { IconButton } from './IconButton'
 import { Tab } from './Tab'
+import Table from './Table'
 
 export const Document: React.FC<{ document: any }> = ({ document }) => {
   return (
@@ -24,33 +31,33 @@ export interface ICollectionViewer {
   server: string
   database: string
   collection: string
+  count: number
+  params: IFindInputType
 }
 
-export const CollectionViewer: React.FC<ICollectionViewer> = ({
-  server,
-  database,
-  collection,
-}) => {
-  const [params, setParams] = useState({
-    limit: 20,
-    query: {},
-    skip: 0,
-    sort: {},
-  } as IFindInputType)
-  const { loading, data, error } = useQueryQueryQuery({
+export const CollectionViewer: React.FC<{
+  dataKey: number
+}> = ({ dataKey }) => {
+  const { payload, setPayload } = useContext(CollectionContext)
+  const { server, database, collection, count, params } = payload.tabs[dataKey]
+  const { loading, data } = useQueryQueryQuery({
     variables: {
       uri: server,
       database,
       collection,
-      params,
+      params: {
+        ...params,
+        query: JSON.parse(params.query),
+        sort: JSON.parse(params.sort),
+      },
     },
   })
+  const queryRef = useRef(null)
+  const [error, setError] = useState('')
   if (loading) {
     return (
-      <div className='flex flex-col h-full items-center'>
-        <div className=''>
-          <CircularLoader className='text-6xl' />
-        </div>
+      <div className='flex items-center'>
+        <CircularLoader className='text-6xl' />
       </div>
     )
   }
@@ -58,16 +65,172 @@ export const CollectionViewer: React.FC<ICollectionViewer> = ({
     return (
       <>
         <div className='sticky top bg-white z-0'>
-          <FilterForm />
+          <div className='flex flex-wrap justify-center md:justify-between items-center'>
+            <div>
+              <div className='inline-flex border-2 border-gray-400 rounded-full'>
+                <input
+                  type='text'
+                  className='m-2 mr-0 focus:outline-none'
+                  defaultValue={params.query ?? '{}'}
+                  ref={queryRef}
+                />
+                <IconButton
+                  onClick={() => {
+                    try {
+                      const query = (queryRef.current! as HTMLInputElement)
+                        .value
+                      JSON.parse(query)
+                      setPayload(prev => {
+                        const result = {
+                          ...prev,
+                          tabs: [...prev.tabs],
+                        }
+                        result.tabs[dataKey].params.query = query
+                        return result
+                      })
+                      setError('')
+                    } catch (error) {
+                      setError('Invalid JSON')
+                    }
+                  }}
+                >
+                  <FaSearch />
+                </IconButton>
+              </div>
+              {error && <div>{error}</div>}
+            </div>
+            <div>
+              <div className='flex flex-col items-center mr-2'>
+                <div>
+                  <p>
+                    Documents
+                    <span className='text-green-500'>
+                      {` ${params.skip! + 1} - ${
+                        params.limit! < count
+                          ? params.skip! + params.limit!
+                          : count
+                      } `}
+                    </span>
+                    of <span className='text-green-500'>{count}</span>
+                  </p>
+                </div>
+                <div>
+                  <div className='inline-flex'>
+                    <IconButton
+                      title='Go to first page'
+                      disabled={!params.skip}
+                      onClick={() => {
+                        setPayload(prev => {
+                          const result = {
+                            ...prev,
+                            tabs: [...prev.tabs],
+                          }
+                          result.tabs[dataKey].params.skip! = 0
+                          return result
+                        })
+                      }}
+                    >
+                      <FaAngleDoubleLeft />
+                    </IconButton>
+                    <IconButton
+                      title='Prev'
+                      disabled={!params.skip}
+                      onClick={() => {
+                        setPayload(prev => {
+                          const result = {
+                            ...prev,
+                            tabs: [...prev.tabs],
+                          }
+                          result.tabs[dataKey].params.skip! -= result.tabs[
+                            dataKey
+                          ].params.limit!
+                          if (result.tabs[dataKey].params.skip! < 0) {
+                            result.tabs[dataKey].params.skip! = 0
+                          }
+                          return result
+                        })
+                      }}
+                    >
+                      <FaAngleLeft />
+                    </IconButton>
+                    <select
+                      className='focus:outline-none'
+                      value={params.limit!}
+                      onChange={e => {
+                        const limit = e.target.value
+                        setPayload(prev => {
+                          const result = {
+                            ...prev,
+                            tabs: [...prev.tabs],
+                          }
+                          result.tabs[dataKey].params.limit = parseInt(limit)
+                          return result
+                        })
+                      }}
+                    >
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                    <IconButton
+                      title='Next'
+                      disabled={params.skip! + params.limit! >= count}
+                      onClick={() => {
+                        setPayload(prev => {
+                          const result = {
+                            ...prev,
+                            tabs: [...prev.tabs],
+                          }
+                          result.tabs[dataKey].params.skip! += result.tabs[
+                            dataKey
+                          ].params.limit!
+                          return result
+                        })
+                      }}
+                    >
+                      <FaAngleRight />
+                    </IconButton>
+                    <IconButton
+                      title='Go to last page'
+                      disabled={params.skip! + params.limit! >= count}
+                      onClick={() => {
+                        setPayload(prev => {
+                          const result = {
+                            ...prev,
+                            tabs: [...prev.tabs],
+                          }
+                          result.tabs[dataKey].params.skip! =
+                            result.tabs[dataKey].params.limit! *
+                            Math.floor(
+                              count / result.tabs[dataKey].params.limit!,
+                            )
+                          return result
+                        })
+                      }}
+                    >
+                      <FaAngleDoubleRight />
+                    </IconButton>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <style jsx={true}>{`
           .top {
             top: 2.5rem;
           }
         `}</style>
-        {(data.query as any[]).map((document, key) => (
-          <Document key={key} document={document} />
-        ))}
+        <div className='text-xs'>
+          <Table data={data.query} />
+        </div>
+
+        {/* {(data.query as any[]).map((document, key) => (
+          <>
+            <span>{key}: </span>
+            <Document key={key} document={document} />
+          </>
+        ))} */}
       </>
     )
   } else {
@@ -75,72 +238,8 @@ export const CollectionViewer: React.FC<ICollectionViewer> = ({
   }
 }
 
-const FilterForm = () => {
-  return (
-    <form
-      className='border border-gray-200 rounded p-2'
-      onSubmit={async e => {
-        e.preventDefault()
-      }}
-    >
-      <div className='flex flex-wrap md:flex-no-wrap items-end'>
-        <div className='mr-0 md:mr-4 flex-auto'>
-          <label className='block text-sm font-bold mb-2' htmlFor='query'>
-            Query
-          </label>
-          <input
-            className='shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline'
-            id='query'
-            type='text'
-            defaultValue='{}'
-          />
-        </div>
-        <div className='mr-0 md:mr-4 flex-auto'>
-          <label className='block text-sm font-bold mb-2' htmlFor='skip'>
-            Skip
-          </label>
-          <input
-            className='shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline'
-            id='skip'
-            type='text'
-            defaultValue={0}
-          />
-        </div>
-        <div className='mr-0 md:mr-4 flex-auto'>
-          <label className='block text-sm font-bold mb-2' htmlFor='Limit'>
-            Limit
-          </label>
-          <input
-            className='shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline'
-            id='Limit'
-            type='text'
-            defaultValue={20}
-          />
-        </div>
-        <div className='mr-0 md:mr-4 flex-auto'>
-          <label className='block text-sm font-bold mb-2' htmlFor='sort'>
-            Sort
-          </label>
-          <input
-            className='shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline'
-            id='sort'
-            type='text'
-            defaultValue={'{}'}
-          />
-        </div>
-        {/* <div className='flex-auto w-full md:w-auto'> */}
-        <Button className='flex-auto w-full mt-4 md:w-auto md:mt-0'>
-          <FaCheckCircle className='inline-block' /> Apply
-        </Button>
-        {/* </div> */}
-      </div>
-    </form>
-  )
-}
-
 export const Collection: React.FC = () => {
   const { payload, setPayload } = useContext(CollectionContext)
-  console.log('payload', payload)
   if (payload.tabs.length) {
     return (
       <Tab
@@ -154,7 +253,12 @@ export const Collection: React.FC = () => {
         tabs={payload.tabs.map((tab, key) => {
           return {
             name: tab.collection,
-            content: <CollectionViewer {...tab} />,
+            content: (
+              <CollectionViewer
+                key={`${tab.server}>${tab.database}>${tab.collection}`}
+                dataKey={key}
+              />
+            ),
           }
         })}
       />

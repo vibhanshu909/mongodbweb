@@ -17,4 +17,8 @@ module.exports = {
       full: '100%',
     },
   },
+  variants: {
+    padding: ['responsive', 'important'],
+  },
+  plugins: [require('tailwindcss-important')()],
 }

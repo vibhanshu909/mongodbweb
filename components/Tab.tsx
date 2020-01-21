@@ -75,12 +75,15 @@ export const Tab: React.FC<ITabProps> = props => {
                   />
                 </button>
               )
-              return
             }
           })}
         </div>
       </div>
-      {tabs[selected].content}
+      {tabs.map((tab, key) => (
+        <div key={key} style={{ display: key === selected ? 'block' : 'none' }}>
+          {tab.content}
+        </div>
+      ))}
     </div>
   )
 }
