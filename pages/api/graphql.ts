@@ -58,6 +58,7 @@ const Query = queryType({
           await client.connect()
           return true
         } catch (error) {
+          throw new Error('Failed to connect')
         } finally {
           await client.close()
         }
@@ -84,7 +85,6 @@ const Query = queryType({
           return dbList.databases
         } catch (error) {
           throw new Error('Failed to connect')
-          return null
         } finally {
           await client.close()
         }
@@ -147,7 +147,7 @@ const Query = queryType({
         try {
           await client.connect()
           const db = client.db(database)
-          return db
+          return await db
             .collection(collection)
             .find(query, { ...rest, batchSize: rest.limit })
             .toArray()
@@ -172,12 +172,15 @@ const Mutation = mutationType({
         const client = new MongoClient(uri)
         try {
           await client.connect()
-          client
+          await client
             .db()
             .admin()
             .listDatabases()
           return true
-        } catch (error) {}
+        } catch (error) {
+        } finally {
+          await client.close()
+        }
         return false
       },
     })
