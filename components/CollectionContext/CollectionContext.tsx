@@ -1,5 +1,5 @@
 import React from 'react'
-import { ICollectionViewer } from '../Collection'
+import { ICollectionViewer } from '../CollectionViewer'
 
 export interface ICollectionContextPayload {
   tabs: ICollectionViewer[]

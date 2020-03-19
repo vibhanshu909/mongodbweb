@@ -8,23 +8,24 @@ interface IDialog {
 
 export const Dialog: React.FC<IDialog> = props => {
   const { onClose, children } = props
-  let { position = 'center' } = props
+  const { position = 'center' } = props
   const ref = useClickoutsideListenerRef(onClose)
+  let classNames = ''
   switch (position as IDialog['position']) {
     case 'center':
-      position = 'm-auto'
+      classNames = 'm-auto'
       break
     case 'left':
-      position = 'mr-auto h-full'
+      classNames = 'mr-auto h-full'
       break
     case 'top':
-      position = 'mb-auto h-full'
+      classNames = 'mb-auto h-full'
       break
     case 'right':
-      position = 'ml-auto h-full'
+      classNames = 'ml-auto h-full'
       break
     case 'bottom':
-      position = 'mt-auto h-full'
+      classNames = 'mt-auto h-full'
       break
   }
   return (
@@ -32,7 +33,7 @@ export const Dialog: React.FC<IDialog> = props => {
       <div className='flex h-full'>
         <div
           ref={ref}
-          className={`bg-white p-3 md:w-1/3 max-w-3/4 ${position} rounded overflow-auto`}
+          className={`bg-white p-3 md:w-1/3 max-w-3/4 ${classNames} rounded overflow-auto`}
         >
           {children}
         </div>

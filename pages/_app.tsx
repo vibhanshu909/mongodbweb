@@ -4,7 +4,7 @@ import React from 'react'
 import { CollectionContextProvider } from '../components/CollectionContext/CollectionContextProvider'
 import LocalStorageProvider from '../components/LocalStorageContext/LocalStorageProvider'
 import Layout from '../Layout'
-import withData from '../lib/apollo-client'
+import { withData } from '../lib/apollo-client'
 import '../styles/main.css'
 
 class MyApp extends App<any, any, { hasError: boolean }> {

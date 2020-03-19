@@ -11,6 +11,10 @@ const Layout: React.FC = ({ children }) => {
           name='description'
           content='A simple web application that allows you to connect to your mongodb server and perform CRUD operations.'
         />
+        <meta
+          name='keywords'
+          content='web, studio, admin panel, mongo, mongodb, studio3t, mongo admin, mongodb admin, web panel, free, mongodbweb, online mongodb, crud'
+        />
         {process.env.NODE_ENV === 'production' && (
           <>
             <script

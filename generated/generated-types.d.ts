@@ -67,19 +67,25 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     addServer: any; // JSON!
+    create: boolean; // Boolean!
   }
   Query: { // field return type
     checkServer: boolean; // Boolean!
     listCollections: NexusGenRootTypes['Collection'][] | null; // [Collection!]
     listDatabases: NexusGenRootTypes['Database'][] | null; // [Database!]
     query: any; // JSON!
-    servers: string; // String!
   }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
     addServer: { // args
+      uri: string; // String!
+    }
+    create: { // args
+      collection: string; // String!
+      database: string; // String!
+      document: any; // JSON!
       uri: string; // String!
     }
   }

@@ -3,6 +3,7 @@ import { ApolloServer } from 'apollo-server-micro'
 import GraphQLJSON from 'graphql-type-json'
 import { MongoClient } from 'mongodb'
 import {
+  arg,
   asNexusMethod,
   inputObjectType,
   makeSchema,
@@ -42,11 +43,6 @@ export const FindInputType = inputObjectType({
 
 const Query = queryType({
   definition(t) {
-    t.string('servers', {
-      resolve: () => {
-        return `Hello World`
-      },
-    })
     t.boolean('checkServer', {
       args: { uri: stringArg({ nullable: false }) },
       resolve: async (_, { uri }) => {
@@ -178,10 +174,38 @@ const Mutation = mutationType({
             .listDatabases()
           return true
         } catch (error) {
+          throw new Error('Failed to connect')
         } finally {
           await client.close()
         }
-        return false
+      },
+    })
+    t.boolean('create', {
+      args: {
+        uri: stringArg({ nullable: false }),
+        database: stringArg({ nullable: false }),
+        collection: stringArg({ nullable: false }),
+        document: arg({ type: 'JSON', nullable: false }),
+      },
+      resolve: async (_, args) => {
+        const { uri, database, collection, document } = args
+        const client = new MongoClient(uri, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        })
+        try {
+          await client.connect()
+          const db = client.db(database)
+          const res = await db
+            .collection(collection)
+            .insertOne(JSON.parse(document))
+          return !!res.result.ok
+        } catch (error) {
+          console.log('error', error)
+          throw new Error('Failed to create')
+        } finally {
+          await client.close()
+        }
       },
     })
   },

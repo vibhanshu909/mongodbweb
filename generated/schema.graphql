@@ -26,6 +26,7 @@ scalar JSON
 
 type Mutation {
   addServer(uri: String!): JSON!
+  create(collection: String!, database: String!, document: JSON!, uri: String!): Boolean!
 }
 
 type Query {
@@ -33,5 +34,4 @@ type Query {
   listCollections(database: String!, uri: String!): [Collection!]
   listDatabases(uri: String!): [Database!]
   query(collection: String!, database: String!, params: FindInputType, uri: String!): JSON!
-  servers: String!
 }

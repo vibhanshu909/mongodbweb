@@ -5,10 +5,10 @@ import { Dialog } from './Dialog'
 interface IConfirmDialog {
   title: any
   onClose: () => void
-  onPositive: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+  onPositive?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
   onNegative?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
-  positiveBtn?: React.FC
-  nagativeBtn?: React.FC
+  positiveBtn?: JSX.Element
+  nagativeBtn?: JSX.Element
 }
 
 export const ConfirmDialog: React.FC<IConfirmDialog> = props => {
@@ -16,7 +16,7 @@ export const ConfirmDialog: React.FC<IConfirmDialog> = props => {
     title,
     children,
     onClose,
-    onPositive,
+    onPositive = onClose,
     onNegative = onClose,
     positiveBtn = (
       <Button onClick={onPositive} color='danger'>
