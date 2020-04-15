@@ -15,3 +15,21 @@ export const Create = gql`
     )
   }
 `
+
+export const Update = gql`
+  mutation Update(
+    $uri: String!
+    $database: String!
+    $collection: String!
+    $id: ID!
+    $document: JSON!
+  ) {
+    update(
+      uri: $uri
+      database: $database
+      collection: $collection
+      id: $id
+      document: $document
+    )
+  }
+`

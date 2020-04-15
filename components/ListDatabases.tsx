@@ -26,7 +26,7 @@ const ListDatabases: React.FC<{ server: string; onDelete?: () => void }> = ({
   } else if (error) {
     return <p className='text-red-400'>{error.graphQLErrors[0].message}</p>
   }
-  const url = new URL(server).pathname.split('@')[1]
+  const url = new URL(server).pathname.split('@')[1] || server
   return (
     <Collapse title={url}>
       {data?.listDatabases?.map((database, key) => {

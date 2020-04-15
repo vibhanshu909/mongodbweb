@@ -68,6 +68,7 @@ export interface NexusGenFieldTypes {
   Mutation: { // field return type
     addServer: any; // JSON!
     create: boolean; // Boolean!
+    update: boolean; // Boolean!
   }
   Query: { // field return type
     checkServer: boolean; // Boolean!
@@ -86,6 +87,13 @@ export interface NexusGenArgTypes {
       collection: string; // String!
       database: string; // String!
       document: any; // JSON!
+      uri: string; // String!
+    }
+    update: { // args
+      collection: string; // String!
+      database: string; // String!
+      document: any; // JSON!
+      id: string; // ID!
       uri: string; // String!
     }
   }

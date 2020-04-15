@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { FaEllipsisV } from 'react-icons/fa'
-import { useClickoutsideListenerRef } from '../hooks/useClickoutsideListenerRef'
+import { useClickOutsideListenerRef } from '../hooks/useClickoutsideListenerRef'
 import { IconButton } from './IconButton'
 
 const Content: React.FC<{ onClose: () => void }> = ({ onClose, children }) => {
-  const ref = useClickoutsideListenerRef(onClose)
+  const ref = useClickOutsideListenerRef(onClose)
   return (
     <div
       ref={ref}

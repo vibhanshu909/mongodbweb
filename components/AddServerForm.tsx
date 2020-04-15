@@ -5,7 +5,7 @@ import { LoadingButton } from './LoadingButton'
 import { LocalStorageContext } from './LocalStorageContext/LocalStorageContext'
 
 export const AddServerForm = () => {
-  const { payload, setPayload } = useContext(LocalStorageContext)
+  const { setPayload } = useContext(LocalStorageContext)
   const inputRef = useRef(null)
   const formRef = useRef(null)
   const [checkServer, { data, loading, error }] = useCheckServerQueryLazyQuery({
@@ -19,11 +19,14 @@ export const AddServerForm = () => {
         }
         const newServer = (inputRef.current! as HTMLInputElement).value
         const url = new URL(newServer)
-        if (
-          prev.servers &&
-          !prev.servers.some((s: string) => s.includes(url.pathname))
-        ) {
-          newState.servers = [...prev.servers, newServer]
+        if (prev.servers) {
+          const found = (prev.servers as any[]).findIndex((s: string) =>
+            s.includes(url.pathname),
+          )
+          if (found < 0) {
+            newState.servers = [...prev.servers, newServer]
+          }
+          // else No action required.
         } else {
           newState.servers = [newServer]
         }

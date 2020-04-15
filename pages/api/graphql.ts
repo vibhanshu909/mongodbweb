@@ -1,10 +1,11 @@
 import { ApolloServer } from 'apollo-server-micro'
 // import * as allTypes from "./schema"
 import GraphQLJSON from 'graphql-type-json'
-import { MongoClient } from 'mongodb'
+import { MongoClient, ObjectId } from 'mongodb'
 import {
   arg,
   asNexusMethod,
+  idArg,
   inputObjectType,
   makeSchema,
   mutationType,
@@ -13,6 +14,7 @@ import {
   stringArg,
 } from 'nexus'
 import * as path from 'path'
+import { filterObject } from '../../lib/utils/filterObject'
 
 const json = asNexusMethod(GraphQLJSON, 'json')
 
@@ -203,6 +205,47 @@ const Mutation = mutationType({
         } catch (error) {
           console.log('error', error)
           throw new Error('Failed to create')
+        } finally {
+          await client.close()
+        }
+      },
+    })
+    t.boolean('update', {
+      args: {
+        uri: stringArg({ nullable: false }),
+        database: stringArg({ nullable: false }),
+        collection: stringArg({ nullable: false }),
+        id: idArg({ nullable: false }),
+        document: arg({ type: 'JSON', nullable: false }),
+      },
+      resolve: async (_, args) => {
+        const { uri, database, collection, id, document } = args
+        const client = new MongoClient(uri, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        })
+        try {
+          await client.connect()
+          const db = client.db(database)
+          try {
+            const res = await db
+              .collection(collection)
+              // cannot use updateOne as it is equi-valent to Object.assign(old, new)/{...old, ...new}.
+              .replaceOne(
+                { _id: new ObjectId(id) },
+                filterObject(JSON.parse(document), ['_id']),
+                {
+                  upsert: true,
+                },
+              )
+            return !!res.result.ok
+          } catch (error) {
+            console.log('error', error)
+            throw new Error('Failed to update document')
+          }
+        } catch (error) {
+          console.log('error', error)
+          throw new Error('Failed to connect')
         } finally {
           await client.close()
         }

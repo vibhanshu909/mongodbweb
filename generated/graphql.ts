@@ -4,90 +4,100 @@ import * as ApolloReactHooks from '@apollo/react-hooks';
 export type Maybe<T> = T | null;
 /** All built-in and custom scalars, mapped to their actual values */
 export interface Scalars {
-  ID: string,
-  String: string,
-  Boolean: boolean,
-  Int: number,
-  Float: number,
-  JSON: any,
+  ID: string;
+  String: string;
+  Boolean: boolean;
+  Int: number;
+  Float: number;
+  JSON: any;
 }
 
 export interface ICollection {
-   __typename?: 'Collection',
-  name: Scalars['String'],
-  count: Scalars['Int'],
+   __typename?: 'Collection';
+  name: Scalars['String'];
+  count: Scalars['Int'];
 }
 
 export interface IDatabase {
-   __typename?: 'Database',
-  name: Scalars['String'],
-  empty: Scalars['Boolean'],
+   __typename?: 'Database';
+  name: Scalars['String'];
+  empty: Scalars['Boolean'];
 }
 
 export interface IFindInputType {
-  query?: Maybe<Scalars['JSON']>,
-  skip?: Maybe<Scalars['Int']>,
-  limit?: Maybe<Scalars['Int']>,
-  sort?: Maybe<Scalars['JSON']>,
+  query?: Maybe<Scalars['JSON']>;
+  skip?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
+  sort?: Maybe<Scalars['JSON']>;
 }
 
 
 export interface IMutation {
-   __typename?: 'Mutation',
-  addServer: Scalars['JSON'],
-  create: Scalars['Boolean'],
+   __typename?: 'Mutation';
+  addServer: Scalars['JSON'];
+  create: Scalars['Boolean'];
+  update: Scalars['Boolean'];
 }
 
 
 export interface IMutationAddServerArgs {
-  uri: Scalars['String']
+  uri: Scalars['String'];
 }
 
 
 export interface IMutationCreateArgs {
-  uri: Scalars['String'],
-  database: Scalars['String'],
-  collection: Scalars['String'],
-  document: Scalars['JSON']
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  document: Scalars['JSON'];
+}
+
+
+export interface IMutationUpdateArgs {
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  id: Scalars['ID'];
+  document: Scalars['JSON'];
 }
 
 export interface IQuery {
-   __typename?: 'Query',
-  checkServer: Scalars['Boolean'],
-  listDatabases?: Maybe<Array<IDatabase>>,
-  listCollections?: Maybe<Array<ICollection>>,
-  query: Scalars['JSON'],
+   __typename?: 'Query';
+  checkServer: Scalars['Boolean'];
+  listDatabases?: Maybe<Array<IDatabase>>;
+  listCollections?: Maybe<Array<ICollection>>;
+  query: Scalars['JSON'];
 }
 
 
 export interface IQueryCheckServerArgs {
-  uri: Scalars['String']
+  uri: Scalars['String'];
 }
 
 
 export interface IQueryListDatabasesArgs {
-  uri: Scalars['String']
+  uri: Scalars['String'];
 }
 
 
 export interface IQueryListCollectionsArgs {
-  uri: Scalars['String'],
-  database: Scalars['String']
+  uri: Scalars['String'];
+  database: Scalars['String'];
 }
 
 
 export interface IQueryQueryArgs {
-  uri: Scalars['String'],
-  database: Scalars['String'],
-  collection: Scalars['String'],
-  params?: Maybe<IFindInputType>
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  params?: Maybe<IFindInputType>;
 }
 
 export type ICreateMutationVariables = {
-  uri: Scalars['String'],
-  database: Scalars['String'],
-  collection: Scalars['String'],
-  document: Scalars['JSON']
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  document: Scalars['JSON'];
 };
 
 
@@ -96,8 +106,22 @@ export type ICreateMutation = (
   & Pick<IMutation, 'create'>
 );
 
+export type IUpdateMutationVariables = {
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  id: Scalars['ID'];
+  document: Scalars['JSON'];
+};
+
+
+export type IUpdateMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<IMutation, 'update'>
+);
+
 export type ICheckServerQueryQueryVariables = {
-  uri: Scalars['String']
+  uri: Scalars['String'];
 };
 
 
@@ -107,7 +131,7 @@ export type ICheckServerQueryQuery = (
 );
 
 export type IListDatabasesQueryQueryVariables = {
-  uri: Scalars['String']
+  uri: Scalars['String'];
 };
 
 
@@ -120,8 +144,8 @@ export type IListDatabasesQueryQuery = (
 );
 
 export type IListCollectionsQueryQueryVariables = {
-  uri: Scalars['String'],
-  database: Scalars['String']
+  uri: Scalars['String'];
+  database: Scalars['String'];
 };
 
 
@@ -134,10 +158,10 @@ export type IListCollectionsQueryQuery = (
 );
 
 export type IQueryQueryQueryVariables = {
-  uri: Scalars['String'],
-  database: Scalars['String'],
-  collection: Scalars['String'],
-  params?: Maybe<IFindInputType>
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  params?: Maybe<IFindInputType>;
 };
 
 
@@ -179,6 +203,39 @@ export function useCreateMutation(baseOptions?: ApolloReactHooks.MutationHookOpt
 export type CreateMutationHookResult = ReturnType<typeof useCreateMutation>;
 export type CreateMutationResult = ApolloReactCommon.MutationResult<ICreateMutation>;
 export type CreateMutationOptions = ApolloReactCommon.BaseMutationOptions<ICreateMutation, ICreateMutationVariables>;
+export const UpdateDocument = gql`
+    mutation Update($uri: String!, $database: String!, $collection: String!, $id: ID!, $document: JSON!) {
+  update(uri: $uri, database: $database, collection: $collection, id: $id, document: $document)
+}
+    `;
+
+/**
+ * __useUpdateMutation__
+ *
+ * To run a mutation, you first call `useUpdateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateMutation, { data, loading, error }] = useUpdateMutation({
+ *   variables: {
+ *      uri: // value for 'uri'
+ *      database: // value for 'database'
+ *      collection: // value for 'collection'
+ *      id: // value for 'id'
+ *      document: // value for 'document'
+ *   },
+ * });
+ */
+export function useUpdateMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<IUpdateMutation, IUpdateMutationVariables>) {
+        return ApolloReactHooks.useMutation<IUpdateMutation, IUpdateMutationVariables>(UpdateDocument, baseOptions);
+      }
+export type UpdateMutationHookResult = ReturnType<typeof useUpdateMutation>;
+export type UpdateMutationResult = ApolloReactCommon.MutationResult<IUpdateMutation>;
+export type UpdateMutationOptions = ApolloReactCommon.BaseMutationOptions<IUpdateMutation, IUpdateMutationVariables>;
 export const CheckServerQueryDocument = gql`
     query CheckServerQuery($uri: String!) {
   checkServer(uri: $uri)

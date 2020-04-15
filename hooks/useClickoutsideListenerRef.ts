@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 
-export const useClickoutsideListenerRef = (onClose: () => void) => {
+export const useClickOutsideListenerRef = (onClose: () => void) => {
   const ref = useRef(null)
   const escapeListener = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') {

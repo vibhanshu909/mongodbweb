@@ -7,10 +7,10 @@ import {
 
 interface IContextMenu {
   onMenuItemSelected: (value: any) => void
-  menuItems: Array<{
+  menuItems: {
     key: any
     value: any
-  }>
+  }[]
 }
 
 export const ContextMenu: React.FC<IContextMenu> = props => {

@@ -5,10 +5,10 @@ const selectedClassName: HTMLButtonElement['className'] =
   'border-b-4 border-blue-600 text-blue-600'
 
 interface ITabProps {
-  tabs: Array<{
+  tabs: {
     name: any
     content: any
-  }>
+  }[]
   selected: number
   onClose: (index: number) => void
 }

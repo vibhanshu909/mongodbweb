@@ -14,13 +14,16 @@ import {
   IFindInputType,
   useCreateMutation,
   useQueryQueryQuery,
+  useUpdateMutation,
 } from '../generated/graphql'
+import { filterObject } from '../lib/utils/filterObject'
 import { Button } from './Button'
 import CircularLoader from './CircularLoader'
 import { CollectionContext } from './CollectionContext/CollectionContext'
 import { ConfirmDialog } from './ConfirmDialog'
 import { Document } from './Document'
 import { IconButton } from './IconButton'
+import { LoadingButton } from './LoadingButton'
 import Table from './Table'
 
 enum Dialog {
@@ -59,12 +62,14 @@ export const CollectionViewer: React.FC<{
     },
   })
   const queryRef = useRef(null)
+  const [opLoading, setOpLoading] = useState(undefined)
   const [error, setError] = useState('')
   const [open, setOpen] = useState(Dialog.NONE)
   const [document, setDocument] = useState('{}')
   const [view, setView] = useState(View.TABLE)
   const [selected, setSelected] = useState([] as number[])
   const [createMutation] = useCreateMutation()
+  const [updateMutation] = useUpdateMutation()
   if (loading) {
     return (
       <div className='flex items-center'>
@@ -289,37 +294,52 @@ export const CollectionViewer: React.FC<{
             <IconButton
               title={'Edit Document'}
               disabled={selected.length !== 1}
-              onClick={() => setOpen(Dialog.UPDATE)}
+              onClick={() => {
+                setDocument(
+                  JSON.stringify(
+                    filterObject(data.query[selected[0]], ['_id']),
+                    null,
+                    2,
+                  ),
+                )
+                setOpen(Dialog.UPDATE)
+              }}
             >
               <FaPencilAlt />
             </IconButton>
             {open === Dialog.UPDATE && (
               <ConfirmDialog
-                title='Insert Document'
+                title='Edit Document'
                 onClose={() => setOpen(Dialog.NONE)}
                 positiveBtn={
-                  <Button
+                  <LoadingButton
+                    loading={data.query[selected[0]]._id === opLoading}
                     color='success'
                     onClick={async () => {
+                      const id = data.query[selected[0]]._id
+                      setOpLoading(id)
                       try {
-                        const { data } = await createMutation({
+                        const { data: resultData } = await updateMutation({
                           variables: {
                             uri: server,
                             database,
                             collection,
+                            id,
                             document,
                           },
                         })
-                        console.log('data', data)
-                        setOpen(Dialog.NONE)
+                        console.log('data', resultData)
                         await refetch()
+                        setOpen(Dialog.NONE)
                       } catch (error) {
                         alert(error.message)
+                      } finally {
+                        setOpLoading(undefined)
                       }
                     }}
                   >
-                    Add Document
-                  </Button>
+                    Update Document
+                  </LoadingButton>
                 }
               >
                 <div className='text-base'>
@@ -351,7 +371,7 @@ export const CollectionViewer: React.FC<{
               disabled={selected.length === 0}
               title={'Remove Document'}
             >
-              <FaTrashAlt />
+              <FaTrashAlt className='text-red-600' />
             </IconButton>
           </div>
           <div>
