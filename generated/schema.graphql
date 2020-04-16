@@ -27,6 +27,7 @@ scalar JSON
 type Mutation {
   addServer(uri: String!): JSON!
   create(collection: String!, database: String!, document: JSON!, uri: String!): Boolean!
+  delete(collection: String!, database: String!, ids: [ID!]!, uri: String!): Boolean!
   update(collection: String!, database: String!, document: JSON!, id: ID!, uri: String!): Boolean!
 }
 

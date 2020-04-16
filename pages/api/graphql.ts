@@ -245,6 +245,40 @@ const Mutation = mutationType({
         }
       },
     })
+
+    t.boolean('delete', {
+      args: {
+        uri: stringArg({ nullable: false }),
+        database: stringArg({ nullable: false }),
+        collection: stringArg({ nullable: false }),
+        ids: idArg({ list: true, nullable: false }),
+      },
+      resolve: async (_, args) => {
+        const { uri, database, collection, ids } = args
+        const client = new MongoClient(uri, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        })
+        try {
+          await client.connect()
+          const db = client.db(database)
+          try {
+            const res = await db
+              .collection(collection)
+              .deleteMany({ _id: { $in: ids.map((id) => new ObjectId(id)) } })
+            return !!res.result.ok
+          } catch (error) {
+            console.log('error', error)
+            throw new Error('Failed to delete document')
+          }
+        } catch (error) {
+          console.log('error', error)
+          throw new Error('Failed to connect')
+        } finally {
+          await client.close()
+        }
+      },
+    })
   },
 })
 

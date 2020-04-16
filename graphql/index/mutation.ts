@@ -33,3 +33,13 @@ export const Update = gql`
     )
   }
 `
+export const Delete = gql`
+  mutation Delete(
+    $uri: String!
+    $database: String!
+    $collection: String!
+    $ids: [ID!]!
+  ) {
+    delete(uri: $uri, database: $database, collection: $collection, ids: $ids)
+  }
+`

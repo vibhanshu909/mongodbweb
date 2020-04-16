@@ -12,18 +12,17 @@ import {
 import {
   IFindInputType,
   useCreateMutation,
+  useDeleteMutation,
   useQueryQueryQuery,
   useUpdateMutation,
 } from '../generated/graphql'
 import { filterObject } from '../lib/utils/filterObject'
-import { Button } from './Button'
 import CircularLoader from './CircularLoader'
 import { CollectionContext } from './CollectionContext/CollectionContext'
 import { DeleteButton } from './DeleteButton'
 import { Document } from './Document'
 import { IconButton } from './IconButton'
 import { JSONEditorDialog } from './JSONEditorDialog'
-import { LoadingButton } from './LoadingButton'
 import Table from './Table'
 
 enum Dialog {
@@ -62,14 +61,14 @@ export const CollectionViewer: React.FC<{
     },
   })
   const queryRef = useRef(null)
-  const [opLoading, setOpLoading] = useState(undefined)
+  const [opLoading, setOpLoading] = useState(undefined as any)
   const [error, setError] = useState('')
   const [open, setOpen] = useState(Dialog.NONE)
-  const [document, setDocument] = useState({})
   const [view, setView] = useState(View.TABLE)
   const [selected, setSelected] = useState([] as number[])
   const [createMutation] = useCreateMutation()
   const [updateMutation] = useUpdateMutation()
+  const [deleteMutation] = useDeleteMutation()
   if (loading) {
     return (
       <div className='flex items-center'>
@@ -241,43 +240,36 @@ export const CollectionViewer: React.FC<{
           <div>
             <IconButton
               title='Add Document'
-              onClick={() => {
-                setDocument({})
-                setOpen(Dialog.CREATE)
-              }}
+              onClick={() => setOpen(Dialog.CREATE)}
             >
               <FaPlusCircle />
             </IconButton>
             {open === Dialog.CREATE && (
               <JSONEditorDialog
                 title='Insert Document'
+                content={{}}
+                loading={opLoading}
                 onClose={() => setOpen(Dialog.NONE)}
-                positiveBtn={
-                  <Button
-                    color='success'
-                    onClick={async () => {
-                      try {
-                        const { data } = await createMutation({
-                          variables: {
-                            uri: server,
-                            database,
-                            collection,
-                            document: JSON.stringify(document),
-                          },
-                        })
-                        console.log('data', data)
-                        setOpen(Dialog.NONE)
-                        await refetch()
-                      } catch (error) {
-                        alert(error.message)
-                      }
-                    }}
-                  >
-                    Add Document
-                  </Button>
-                }
-                content={document}
-                getContent={(newDoc) => setDocument(newDoc)}
+                positiveJSX='Add Document'
+                onPositive={async (content) => {
+                  setOpLoading(true)
+                  try {
+                    await createMutation({
+                      variables: {
+                        uri: server,
+                        database,
+                        collection,
+                        document: JSON.stringify(content),
+                      },
+                    })
+                    setOpen(Dialog.NONE)
+                    await refetch()
+                  } catch (error) {
+                    alert(error.message)
+                  } finally {
+                    setOpLoading(undefined)
+                  }
+                }}
               />
             )}
           </div>
@@ -285,49 +277,38 @@ export const CollectionViewer: React.FC<{
             <IconButton
               title={'Edit Document'}
               disabled={selected.length !== 1}
-              onClick={() => {
-                setDocument(filterObject(data.query[selected[0]], ['_id']))
-                setOpen(Dialog.UPDATE)
-              }}
+              onClick={() => setOpen(Dialog.UPDATE)}
             >
               <FaPencilAlt />
             </IconButton>
             {open === Dialog.UPDATE && (
               <JSONEditorDialog
                 title='Edit Document'
+                content={filterObject(data.query[selected[0]], ['_id'])}
+                loading={opLoading}
                 onClose={() => setOpen(Dialog.NONE)}
-                positiveBtn={
-                  <LoadingButton
-                    loading={data.query[selected[0]]._id === opLoading}
-                    color='success'
-                    onClick={async () => {
-                      const id = data.query[selected[0]]._id
-                      setOpLoading(id)
-                      try {
-                        const { data: resultData } = await updateMutation({
-                          variables: {
-                            uri: server,
-                            database,
-                            collection,
-                            id,
-                            document: JSON.stringify(document),
-                          },
-                        })
-                        console.log('data', resultData)
-                        await refetch()
-                        setOpen(Dialog.NONE)
-                      } catch (error) {
-                        alert(error.message)
-                      } finally {
-                        setOpLoading(undefined)
-                      }
-                    }}
-                  >
-                    Update Document
-                  </LoadingButton>
-                }
-                content={document}
-                getContent={(newDoc) => setDocument(newDoc)}
+                positiveJSX='Update Document'
+                onPositive={async (content) => {
+                  const id = data.query[selected[0]]._id
+                  setOpLoading(id)
+                  try {
+                    await updateMutation({
+                      variables: {
+                        uri: server,
+                        database,
+                        collection,
+                        id,
+                        document: JSON.stringify(content),
+                      },
+                    })
+                    await refetch()
+                    setOpen(Dialog.NONE)
+                  } catch (error) {
+                    alert(error.message)
+                  } finally {
+                    setOpLoading(undefined)
+                  }
+                }}
               />
             )}
           </div>
@@ -342,7 +323,26 @@ export const CollectionViewer: React.FC<{
           <div>
             <DeleteButton
               disabled={selected.length === 0}
-              title={'Remove Document'}
+              title={'Delete Document'}
+              onClick={async () => {
+                setOpLoading(true)
+                try {
+                  const ids = selected.map((index) => data.query[index]._id)
+                  await deleteMutation({
+                    variables: {
+                      uri: server,
+                      database,
+                      collection,
+                      ids,
+                    },
+                  })
+                  await refetch()
+                } catch (error) {
+                  alert(error.message)
+                } finally {
+                  setOpLoading(undefined)
+                }
+              }}
             />
           </div>
           <div>

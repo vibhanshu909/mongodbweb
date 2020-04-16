@@ -1,170 +1,204 @@
-import gql from 'graphql-tag'
-import * as ApolloReactCommon from '@apollo/react-common'
-import * as ApolloReactHooks from '@apollo/react-hooks'
-export type Maybe<T> = T | null
+import gql from 'graphql-tag';
+import * as ApolloReactCommon from '@apollo/react-common';
+import * as ApolloReactHooks from '@apollo/react-hooks';
+export type Maybe<T> = T | null;
 /** All built-in and custom scalars, mapped to their actual values */
 export interface Scalars {
-  ID: string
-  String: string
-  Boolean: boolean
-  Int: number
-  Float: number
+  ID: string;
+  String: string;
+  Boolean: boolean;
+  Int: number;
+  Float: number;
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-  JSON: any
+  JSON: any;
 }
+
 
 export interface IQuery {
-  __typename?: 'Query'
-  checkServer: Scalars['Boolean']
-  listDatabases?: Maybe<Array<IDatabase>>
-  listCollections?: Maybe<Array<ICollection>>
-  query: Scalars['JSON']
+   __typename?: 'Query';
+  checkServer: Scalars['Boolean'];
+  listDatabases?: Maybe<Array<IDatabase>>;
+  listCollections?: Maybe<Array<ICollection>>;
+  query: Scalars['JSON'];
 }
+
 
 export interface IQueryCheckServerArgs {
-  uri: Scalars['String']
+  uri: Scalars['String'];
 }
+
 
 export interface IQueryListDatabasesArgs {
-  uri: Scalars['String']
+  uri: Scalars['String'];
 }
+
 
 export interface IQueryListCollectionsArgs {
-  uri: Scalars['String']
-  database: Scalars['String']
+  uri: Scalars['String'];
+  database: Scalars['String'];
 }
 
+
 export interface IQueryQueryArgs {
-  uri: Scalars['String']
-  database: Scalars['String']
-  collection: Scalars['String']
-  params?: Maybe<IFindInputType>
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  params?: Maybe<IFindInputType>;
 }
 
 export interface IMutation {
-  __typename?: 'Mutation'
-  addServer: Scalars['JSON']
-  create: Scalars['Boolean']
-  update: Scalars['Boolean']
+   __typename?: 'Mutation';
+  addServer: Scalars['JSON'];
+  create: Scalars['Boolean'];
+  update: Scalars['Boolean'];
+  delete: Scalars['Boolean'];
 }
+
 
 export interface IMutationAddServerArgs {
-  uri: Scalars['String']
+  uri: Scalars['String'];
 }
+
 
 export interface IMutationCreateArgs {
-  uri: Scalars['String']
-  database: Scalars['String']
-  collection: Scalars['String']
-  document: Scalars['JSON']
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  document: Scalars['JSON'];
 }
 
+
 export interface IMutationUpdateArgs {
-  uri: Scalars['String']
-  database: Scalars['String']
-  collection: Scalars['String']
-  id: Scalars['ID']
-  document: Scalars['JSON']
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  id: Scalars['ID'];
+  document: Scalars['JSON'];
+}
+
+
+export interface IMutationDeleteArgs {
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  ids: Array<Scalars['ID']>;
 }
 
 export interface IDatabase {
-  __typename?: 'Database'
-  name: Scalars['String']
-  empty: Scalars['Boolean']
+   __typename?: 'Database';
+  name: Scalars['String'];
+  empty: Scalars['Boolean'];
 }
 
 export interface ICollection {
-  __typename?: 'Collection'
-  name: Scalars['String']
-  count: Scalars['Int']
+   __typename?: 'Collection';
+  name: Scalars['String'];
+  count: Scalars['Int'];
 }
 
 export interface IFindInputType {
-  query?: Maybe<Scalars['JSON']>
-  skip?: Maybe<Scalars['Int']>
-  limit?: Maybe<Scalars['Int']>
-  sort?: Maybe<Scalars['JSON']>
+  query?: Maybe<Scalars['JSON']>;
+  skip?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
+  sort?: Maybe<Scalars['JSON']>;
 }
 
 export type ICreateMutationVariables = {
-  uri: Scalars['String']
-  database: Scalars['String']
-  collection: Scalars['String']
-  document: Scalars['JSON']
-}
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  document: Scalars['JSON'];
+};
 
-export type ICreateMutation = { __typename?: 'Mutation' } & Pick<
-  IMutation,
-  'create'
->
+
+export type ICreateMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<IMutation, 'create'>
+);
 
 export type IUpdateMutationVariables = {
-  uri: Scalars['String']
-  database: Scalars['String']
-  collection: Scalars['String']
-  id: Scalars['ID']
-  document: Scalars['JSON']
-}
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  id: Scalars['ID'];
+  document: Scalars['JSON'];
+};
 
-export type IUpdateMutation = { __typename?: 'Mutation' } & Pick<
-  IMutation,
-  'update'
->
+
+export type IUpdateMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<IMutation, 'update'>
+);
+
+export type IDeleteMutationVariables = {
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  ids: Array<Scalars['ID']>;
+};
+
+
+export type IDeleteMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<IMutation, 'delete'>
+);
 
 export type ICheckServerQueryQueryVariables = {
-  uri: Scalars['String']
-}
+  uri: Scalars['String'];
+};
 
-export type ICheckServerQueryQuery = { __typename?: 'Query' } & Pick<
-  IQuery,
-  'checkServer'
->
+
+export type ICheckServerQueryQuery = (
+  { __typename?: 'Query' }
+  & Pick<IQuery, 'checkServer'>
+);
 
 export type IListDatabasesQueryQueryVariables = {
-  uri: Scalars['String']
-}
+  uri: Scalars['String'];
+};
 
-export type IListDatabasesQueryQuery = { __typename?: 'Query' } & {
-  listDatabases?: Maybe<
-    Array<{ __typename?: 'Database' } & Pick<IDatabase, 'name' | 'empty'>>
-  >
-}
+
+export type IListDatabasesQueryQuery = (
+  { __typename?: 'Query' }
+  & { listDatabases?: Maybe<Array<(
+    { __typename?: 'Database' }
+    & Pick<IDatabase, 'name' | 'empty'>
+  )>> }
+);
 
 export type IListCollectionsQueryQueryVariables = {
-  uri: Scalars['String']
-  database: Scalars['String']
-}
+  uri: Scalars['String'];
+  database: Scalars['String'];
+};
 
-export type IListCollectionsQueryQuery = { __typename?: 'Query' } & {
-  listCollections?: Maybe<
-    Array<{ __typename?: 'Collection' } & Pick<ICollection, 'name' | 'count'>>
-  >
-}
+
+export type IListCollectionsQueryQuery = (
+  { __typename?: 'Query' }
+  & { listCollections?: Maybe<Array<(
+    { __typename?: 'Collection' }
+    & Pick<ICollection, 'name' | 'count'>
+  )>> }
+);
 
 export type IQueryQueryQueryVariables = {
-  uri: Scalars['String']
-  database: Scalars['String']
-  collection: Scalars['String']
-  params?: Maybe<IFindInputType>
-}
+  uri: Scalars['String'];
+  database: Scalars['String'];
+  collection: Scalars['String'];
+  params?: Maybe<IFindInputType>;
+};
 
-export type IQueryQueryQuery = { __typename?: 'Query' } & Pick<IQuery, 'query'>
+
+export type IQueryQueryQuery = (
+  { __typename?: 'Query' }
+  & Pick<IQuery, 'query'>
+);
+
 
 export const CreateDocument = gql`
-  mutation Create(
-    $uri: String!
-    $database: String!
-    $collection: String!
-    $document: JSON!
-  ) {
-    create(
-      uri: $uri
-      database: $database
-      collection: $collection
-      document: $document
-    )
-  }
-`
+    mutation Create($uri: String!, $database: String!, $collection: String!, $document: JSON!) {
+  create(uri: $uri, database: $database, collection: $collection, document: $document)
+}
+    `;
 
 /**
  * __useCreateMutation__
@@ -186,42 +220,17 @@ export const CreateDocument = gql`
  *   },
  * });
  */
-export function useCreateMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
-    ICreateMutation,
-    ICreateMutationVariables
-  >,
-) {
-  return ApolloReactHooks.useMutation<
-    ICreateMutation,
-    ICreateMutationVariables
-  >(CreateDocument, baseOptions)
-}
-export type CreateMutationHookResult = ReturnType<typeof useCreateMutation>
-export type CreateMutationResult = ApolloReactCommon.MutationResult<
-  ICreateMutation
->
-export type CreateMutationOptions = ApolloReactCommon.BaseMutationOptions<
-  ICreateMutation,
-  ICreateMutationVariables
->
+export function useCreateMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ICreateMutation, ICreateMutationVariables>) {
+        return ApolloReactHooks.useMutation<ICreateMutation, ICreateMutationVariables>(CreateDocument, baseOptions);
+      }
+export type CreateMutationHookResult = ReturnType<typeof useCreateMutation>;
+export type CreateMutationResult = ApolloReactCommon.MutationResult<ICreateMutation>;
+export type CreateMutationOptions = ApolloReactCommon.BaseMutationOptions<ICreateMutation, ICreateMutationVariables>;
 export const UpdateDocument = gql`
-  mutation Update(
-    $uri: String!
-    $database: String!
-    $collection: String!
-    $id: ID!
-    $document: JSON!
-  ) {
-    update(
-      uri: $uri
-      database: $database
-      collection: $collection
-      id: $id
-      document: $document
-    )
-  }
-`
+    mutation Update($uri: String!, $database: String!, $collection: String!, $id: ID!, $document: JSON!) {
+  update(uri: $uri, database: $database, collection: $collection, id: $id, document: $document)
+}
+    `;
 
 /**
  * __useUpdateMutation__
@@ -244,30 +253,49 @@ export const UpdateDocument = gql`
  *   },
  * });
  */
-export function useUpdateMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
-    IUpdateMutation,
-    IUpdateMutationVariables
-  >,
-) {
-  return ApolloReactHooks.useMutation<
-    IUpdateMutation,
-    IUpdateMutationVariables
-  >(UpdateDocument, baseOptions)
+export function useUpdateMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<IUpdateMutation, IUpdateMutationVariables>) {
+        return ApolloReactHooks.useMutation<IUpdateMutation, IUpdateMutationVariables>(UpdateDocument, baseOptions);
+      }
+export type UpdateMutationHookResult = ReturnType<typeof useUpdateMutation>;
+export type UpdateMutationResult = ApolloReactCommon.MutationResult<IUpdateMutation>;
+export type UpdateMutationOptions = ApolloReactCommon.BaseMutationOptions<IUpdateMutation, IUpdateMutationVariables>;
+export const DeleteDocument = gql`
+    mutation Delete($uri: String!, $database: String!, $collection: String!, $ids: [ID!]!) {
+  delete(uri: $uri, database: $database, collection: $collection, ids: $ids)
 }
-export type UpdateMutationHookResult = ReturnType<typeof useUpdateMutation>
-export type UpdateMutationResult = ApolloReactCommon.MutationResult<
-  IUpdateMutation
->
-export type UpdateMutationOptions = ApolloReactCommon.BaseMutationOptions<
-  IUpdateMutation,
-  IUpdateMutationVariables
->
+    `;
+
+/**
+ * __useDeleteMutation__
+ *
+ * To run a mutation, you first call `useDeleteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteMutation, { data, loading, error }] = useDeleteMutation({
+ *   variables: {
+ *      uri: // value for 'uri'
+ *      database: // value for 'database'
+ *      collection: // value for 'collection'
+ *      ids: // value for 'ids'
+ *   },
+ * });
+ */
+export function useDeleteMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<IDeleteMutation, IDeleteMutationVariables>) {
+        return ApolloReactHooks.useMutation<IDeleteMutation, IDeleteMutationVariables>(DeleteDocument, baseOptions);
+      }
+export type DeleteMutationHookResult = ReturnType<typeof useDeleteMutation>;
+export type DeleteMutationResult = ApolloReactCommon.MutationResult<IDeleteMutation>;
+export type DeleteMutationOptions = ApolloReactCommon.BaseMutationOptions<IDeleteMutation, IDeleteMutationVariables>;
 export const CheckServerQueryDocument = gql`
-  query CheckServerQuery($uri: String!) {
-    checkServer(uri: $uri)
-  }
-`
+    query CheckServerQuery($uri: String!) {
+  checkServer(uri: $uri)
+}
+    `;
 
 /**
  * __useCheckServerQueryQuery__
@@ -285,46 +313,23 @@ export const CheckServerQueryDocument = gql`
  *   },
  * });
  */
-export function useCheckServerQueryQuery(
-  baseOptions?: ApolloReactHooks.QueryHookOptions<
-    ICheckServerQueryQuery,
-    ICheckServerQueryQueryVariables
-  >,
-) {
-  return ApolloReactHooks.useQuery<
-    ICheckServerQueryQuery,
-    ICheckServerQueryQueryVariables
-  >(CheckServerQueryDocument, baseOptions)
-}
-export function useCheckServerQueryLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
-    ICheckServerQueryQuery,
-    ICheckServerQueryQueryVariables
-  >,
-) {
-  return ApolloReactHooks.useLazyQuery<
-    ICheckServerQueryQuery,
-    ICheckServerQueryQueryVariables
-  >(CheckServerQueryDocument, baseOptions)
-}
-export type CheckServerQueryQueryHookResult = ReturnType<
-  typeof useCheckServerQueryQuery
->
-export type CheckServerQueryLazyQueryHookResult = ReturnType<
-  typeof useCheckServerQueryLazyQuery
->
-export type CheckServerQueryQueryResult = ApolloReactCommon.QueryResult<
-  ICheckServerQueryQuery,
-  ICheckServerQueryQueryVariables
->
+export function useCheckServerQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ICheckServerQueryQuery, ICheckServerQueryQueryVariables>) {
+        return ApolloReactHooks.useQuery<ICheckServerQueryQuery, ICheckServerQueryQueryVariables>(CheckServerQueryDocument, baseOptions);
+      }
+export function useCheckServerQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ICheckServerQueryQuery, ICheckServerQueryQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ICheckServerQueryQuery, ICheckServerQueryQueryVariables>(CheckServerQueryDocument, baseOptions);
+        }
+export type CheckServerQueryQueryHookResult = ReturnType<typeof useCheckServerQueryQuery>;
+export type CheckServerQueryLazyQueryHookResult = ReturnType<typeof useCheckServerQueryLazyQuery>;
+export type CheckServerQueryQueryResult = ApolloReactCommon.QueryResult<ICheckServerQueryQuery, ICheckServerQueryQueryVariables>;
 export const ListDatabasesQueryDocument = gql`
-  query ListDatabasesQuery($uri: String!) {
-    listDatabases(uri: $uri) {
-      name
-      empty
-    }
+    query ListDatabasesQuery($uri: String!) {
+  listDatabases(uri: $uri) {
+    name
+    empty
   }
-`
+}
+    `;
 
 /**
  * __useListDatabasesQueryQuery__
@@ -342,46 +347,23 @@ export const ListDatabasesQueryDocument = gql`
  *   },
  * });
  */
-export function useListDatabasesQueryQuery(
-  baseOptions?: ApolloReactHooks.QueryHookOptions<
-    IListDatabasesQueryQuery,
-    IListDatabasesQueryQueryVariables
-  >,
-) {
-  return ApolloReactHooks.useQuery<
-    IListDatabasesQueryQuery,
-    IListDatabasesQueryQueryVariables
-  >(ListDatabasesQueryDocument, baseOptions)
-}
-export function useListDatabasesQueryLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
-    IListDatabasesQueryQuery,
-    IListDatabasesQueryQueryVariables
-  >,
-) {
-  return ApolloReactHooks.useLazyQuery<
-    IListDatabasesQueryQuery,
-    IListDatabasesQueryQueryVariables
-  >(ListDatabasesQueryDocument, baseOptions)
-}
-export type ListDatabasesQueryQueryHookResult = ReturnType<
-  typeof useListDatabasesQueryQuery
->
-export type ListDatabasesQueryLazyQueryHookResult = ReturnType<
-  typeof useListDatabasesQueryLazyQuery
->
-export type ListDatabasesQueryQueryResult = ApolloReactCommon.QueryResult<
-  IListDatabasesQueryQuery,
-  IListDatabasesQueryQueryVariables
->
+export function useListDatabasesQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IListDatabasesQueryQuery, IListDatabasesQueryQueryVariables>) {
+        return ApolloReactHooks.useQuery<IListDatabasesQueryQuery, IListDatabasesQueryQueryVariables>(ListDatabasesQueryDocument, baseOptions);
+      }
+export function useListDatabasesQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IListDatabasesQueryQuery, IListDatabasesQueryQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IListDatabasesQueryQuery, IListDatabasesQueryQueryVariables>(ListDatabasesQueryDocument, baseOptions);
+        }
+export type ListDatabasesQueryQueryHookResult = ReturnType<typeof useListDatabasesQueryQuery>;
+export type ListDatabasesQueryLazyQueryHookResult = ReturnType<typeof useListDatabasesQueryLazyQuery>;
+export type ListDatabasesQueryQueryResult = ApolloReactCommon.QueryResult<IListDatabasesQueryQuery, IListDatabasesQueryQueryVariables>;
 export const ListCollectionsQueryDocument = gql`
-  query ListCollectionsQuery($uri: String!, $database: String!) {
-    listCollections(uri: $uri, database: $database) {
-      name
-      count
-    }
+    query ListCollectionsQuery($uri: String!, $database: String!) {
+  listCollections(uri: $uri, database: $database) {
+    name
+    count
   }
-`
+}
+    `;
 
 /**
  * __useListCollectionsQueryQuery__
@@ -400,53 +382,20 @@ export const ListCollectionsQueryDocument = gql`
  *   },
  * });
  */
-export function useListCollectionsQueryQuery(
-  baseOptions?: ApolloReactHooks.QueryHookOptions<
-    IListCollectionsQueryQuery,
-    IListCollectionsQueryQueryVariables
-  >,
-) {
-  return ApolloReactHooks.useQuery<
-    IListCollectionsQueryQuery,
-    IListCollectionsQueryQueryVariables
-  >(ListCollectionsQueryDocument, baseOptions)
-}
-export function useListCollectionsQueryLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
-    IListCollectionsQueryQuery,
-    IListCollectionsQueryQueryVariables
-  >,
-) {
-  return ApolloReactHooks.useLazyQuery<
-    IListCollectionsQueryQuery,
-    IListCollectionsQueryQueryVariables
-  >(ListCollectionsQueryDocument, baseOptions)
-}
-export type ListCollectionsQueryQueryHookResult = ReturnType<
-  typeof useListCollectionsQueryQuery
->
-export type ListCollectionsQueryLazyQueryHookResult = ReturnType<
-  typeof useListCollectionsQueryLazyQuery
->
-export type ListCollectionsQueryQueryResult = ApolloReactCommon.QueryResult<
-  IListCollectionsQueryQuery,
-  IListCollectionsQueryQueryVariables
->
+export function useListCollectionsQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IListCollectionsQueryQuery, IListCollectionsQueryQueryVariables>) {
+        return ApolloReactHooks.useQuery<IListCollectionsQueryQuery, IListCollectionsQueryQueryVariables>(ListCollectionsQueryDocument, baseOptions);
+      }
+export function useListCollectionsQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IListCollectionsQueryQuery, IListCollectionsQueryQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IListCollectionsQueryQuery, IListCollectionsQueryQueryVariables>(ListCollectionsQueryDocument, baseOptions);
+        }
+export type ListCollectionsQueryQueryHookResult = ReturnType<typeof useListCollectionsQueryQuery>;
+export type ListCollectionsQueryLazyQueryHookResult = ReturnType<typeof useListCollectionsQueryLazyQuery>;
+export type ListCollectionsQueryQueryResult = ApolloReactCommon.QueryResult<IListCollectionsQueryQuery, IListCollectionsQueryQueryVariables>;
 export const QueryQueryDocument = gql`
-  query QueryQuery(
-    $uri: String!
-    $database: String!
-    $collection: String!
-    $params: FindInputType
-  ) {
-    query(
-      uri: $uri
-      database: $database
-      collection: $collection
-      params: $params
-    )
-  }
-`
+    query QueryQuery($uri: String!, $database: String!, $collection: String!, $params: FindInputType) {
+  query(uri: $uri, database: $database, collection: $collection, params: $params)
+}
+    `;
 
 /**
  * __useQueryQueryQuery__
@@ -467,33 +416,12 @@ export const QueryQueryDocument = gql`
  *   },
  * });
  */
-export function useQueryQueryQuery(
-  baseOptions?: ApolloReactHooks.QueryHookOptions<
-    IQueryQueryQuery,
-    IQueryQueryQueryVariables
-  >,
-) {
-  return ApolloReactHooks.useQuery<IQueryQueryQuery, IQueryQueryQueryVariables>(
-    QueryQueryDocument,
-    baseOptions,
-  )
-}
-export function useQueryQueryLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
-    IQueryQueryQuery,
-    IQueryQueryQueryVariables
-  >,
-) {
-  return ApolloReactHooks.useLazyQuery<
-    IQueryQueryQuery,
-    IQueryQueryQueryVariables
-  >(QueryQueryDocument, baseOptions)
-}
-export type QueryQueryQueryHookResult = ReturnType<typeof useQueryQueryQuery>
-export type QueryQueryLazyQueryHookResult = ReturnType<
-  typeof useQueryQueryLazyQuery
->
-export type QueryQueryQueryResult = ApolloReactCommon.QueryResult<
-  IQueryQueryQuery,
-  IQueryQueryQueryVariables
->
+export function useQueryQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IQueryQueryQuery, IQueryQueryQueryVariables>) {
+        return ApolloReactHooks.useQuery<IQueryQueryQuery, IQueryQueryQueryVariables>(QueryQueryDocument, baseOptions);
+      }
+export function useQueryQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IQueryQueryQuery, IQueryQueryQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IQueryQueryQuery, IQueryQueryQueryVariables>(QueryQueryDocument, baseOptions);
+        }
+export type QueryQueryQueryHookResult = ReturnType<typeof useQueryQueryQuery>;
+export type QueryQueryLazyQueryHookResult = ReturnType<typeof useQueryQueryLazyQuery>;
+export type QueryQueryQueryResult = ApolloReactCommon.QueryResult<IQueryQueryQuery, IQueryQueryQueryVariables>;
