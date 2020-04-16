@@ -8,7 +8,6 @@ import {
   FaPencilAlt,
   FaPlusCircle,
   FaSearch,
-  FaTrashAlt,
 } from 'react-icons/fa'
 import {
   IFindInputType,
@@ -20,9 +19,10 @@ import { filterObject } from '../lib/utils/filterObject'
 import { Button } from './Button'
 import CircularLoader from './CircularLoader'
 import { CollectionContext } from './CollectionContext/CollectionContext'
-import { ConfirmDialog } from './ConfirmDialog'
+import { DeleteButton } from './DeleteButton'
 import { Document } from './Document'
 import { IconButton } from './IconButton'
+import { JSONEditorDialog } from './JSONEditorDialog'
 import { LoadingButton } from './LoadingButton'
 import Table from './Table'
 
@@ -65,7 +65,7 @@ export const CollectionViewer: React.FC<{
   const [opLoading, setOpLoading] = useState(undefined)
   const [error, setError] = useState('')
   const [open, setOpen] = useState(Dialog.NONE)
-  const [document, setDocument] = useState('{}')
+  const [document, setDocument] = useState({})
   const [view, setView] = useState(View.TABLE)
   const [selected, setSelected] = useState([] as number[])
   const [createMutation] = useCreateMutation()
@@ -96,7 +96,7 @@ export const CollectionViewer: React.FC<{
                       const query = (queryRef.current! as HTMLInputElement)
                         .value
                       JSON.parse(query)
-                      setPayload(prev => {
+                      setPayload((prev) => {
                         const result = {
                           ...prev,
                           tabs: [...prev.tabs],
@@ -136,7 +136,7 @@ export const CollectionViewer: React.FC<{
                       title='Go to first page'
                       disabled={!params.skip}
                       onClick={() => {
-                        setPayload(prev => {
+                        setPayload((prev) => {
                           const result = {
                             ...prev,
                             tabs: [...prev.tabs],
@@ -152,7 +152,7 @@ export const CollectionViewer: React.FC<{
                       title='Prev'
                       disabled={!params.skip}
                       onClick={() => {
-                        setPayload(prev => {
+                        setPayload((prev) => {
                           const result = {
                             ...prev,
                             tabs: [...prev.tabs],
@@ -172,9 +172,9 @@ export const CollectionViewer: React.FC<{
                     <select
                       className='focus:outline-none'
                       value={params.limit!}
-                      onChange={e => {
+                      onChange={(e) => {
                         const limit = e.target.value
-                        setPayload(prev => {
+                        setPayload((prev) => {
                           const result = {
                             ...prev,
                             tabs: [...prev.tabs],
@@ -192,7 +192,7 @@ export const CollectionViewer: React.FC<{
                       title='Next'
                       disabled={params.skip! + params.limit! >= count}
                       onClick={() => {
-                        setPayload(prev => {
+                        setPayload((prev) => {
                           const result = {
                             ...prev,
                             tabs: [...prev.tabs],
@@ -210,7 +210,7 @@ export const CollectionViewer: React.FC<{
                       title='Go to last page'
                       disabled={params.skip! + params.limit! >= count}
                       onClick={() => {
-                        setPayload(prev => {
+                        setPayload((prev) => {
                           const result = {
                             ...prev,
                             tabs: [...prev.tabs],
@@ -241,12 +241,15 @@ export const CollectionViewer: React.FC<{
           <div>
             <IconButton
               title='Add Document'
-              onClick={() => setOpen(Dialog.CREATE)}
+              onClick={() => {
+                setDocument({})
+                setOpen(Dialog.CREATE)
+              }}
             >
               <FaPlusCircle />
             </IconButton>
             {open === Dialog.CREATE && (
-              <ConfirmDialog
+              <JSONEditorDialog
                 title='Insert Document'
                 onClose={() => setOpen(Dialog.NONE)}
                 positiveBtn={
@@ -259,7 +262,7 @@ export const CollectionViewer: React.FC<{
                             uri: server,
                             database,
                             collection,
-                            document,
+                            document: JSON.stringify(document),
                           },
                         })
                         console.log('data', data)
@@ -273,21 +276,9 @@ export const CollectionViewer: React.FC<{
                     Add Document
                   </Button>
                 }
-              >
-                <div className='text-base'>
-                  <textarea
-                    className='w-full'
-                    name='document'
-                    rows={10}
-                    value={document}
-                    onChange={e => {
-                      const newDoc = e.target.value
-                      setDocument(newDoc)
-                    }}
-                    autoFocus={true}
-                  />
-                </div>
-              </ConfirmDialog>
+                content={document}
+                getContent={(newDoc) => setDocument(newDoc)}
+              />
             )}
           </div>
           <div>
@@ -295,20 +286,14 @@ export const CollectionViewer: React.FC<{
               title={'Edit Document'}
               disabled={selected.length !== 1}
               onClick={() => {
-                setDocument(
-                  JSON.stringify(
-                    filterObject(data.query[selected[0]], ['_id']),
-                    null,
-                    2,
-                  ),
-                )
+                setDocument(filterObject(data.query[selected[0]], ['_id']))
                 setOpen(Dialog.UPDATE)
               }}
             >
               <FaPencilAlt />
             </IconButton>
             {open === Dialog.UPDATE && (
-              <ConfirmDialog
+              <JSONEditorDialog
                 title='Edit Document'
                 onClose={() => setOpen(Dialog.NONE)}
                 positiveBtn={
@@ -325,7 +310,7 @@ export const CollectionViewer: React.FC<{
                             database,
                             collection,
                             id,
-                            document,
+                            document: JSON.stringify(document),
                           },
                         })
                         console.log('data', resultData)
@@ -341,21 +326,9 @@ export const CollectionViewer: React.FC<{
                     Update Document
                   </LoadingButton>
                 }
-              >
-                <div className='text-base'>
-                  <textarea
-                    className='w-full'
-                    name='document'
-                    rows={10}
-                    value={document}
-                    onChange={e => {
-                      const newDoc = e.target.value
-                      setDocument(newDoc)
-                    }}
-                    autoFocus={true}
-                  />
-                </div>
-              </ConfirmDialog>
+                content={document}
+                getContent={(newDoc) => setDocument(newDoc)}
+              />
             )}
           </div>
           <div>
@@ -367,17 +340,15 @@ export const CollectionViewer: React.FC<{
             </IconButton>
           </div>
           <div>
-            <IconButton
+            <DeleteButton
               disabled={selected.length === 0}
               title={'Remove Document'}
-            >
-              <FaTrashAlt className='text-red-600' />
-            </IconButton>
+            />
           </div>
           <div>
             <select
               value={view}
-              onChange={e => {
+              onChange={(e) => {
                 setView(e.target.value as View)
               }}
               className='focus:outline-none'
@@ -392,15 +363,15 @@ export const CollectionViewer: React.FC<{
             <Table
               data={data.query}
               selected={selected}
-              onSelect={index => {
+              onSelect={(index) => {
                 if (!selected.includes(index)) {
-                  setSelected(prev => [...prev, index])
+                  setSelected((prev) => [...prev, index])
                 }
               }}
-              onUnSelect={index => {
-                setSelected(prev => prev.filter(e => e !== index))
+              onUnSelect={(index) => {
+                setSelected((prev) => prev.filter((e) => e !== index))
               }}
-              onSelectAll={all => {
+              onSelectAll={(all) => {
                 if (all) {
                   setSelected((data.query as any[]).map((_, index) => index))
                 } else {
@@ -409,7 +380,7 @@ export const CollectionViewer: React.FC<{
               }}
             />
           ) : (
-            (data.query as any[]).map(d => (
+            (data.query as any[]).map((d) => (
               <Document key={d._id} document={d} />
             ))
           )}

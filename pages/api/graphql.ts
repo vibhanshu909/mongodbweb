@@ -76,10 +76,7 @@ const Query = queryType({
         })
         try {
           await client.connect()
-          const dbList = await client
-            .db()
-            .admin()
-            .listDatabases()
+          const dbList = await client.db().admin().listDatabases()
           return dbList.databases
         } catch (error) {
           throw new Error('Failed to connect')
@@ -106,7 +103,7 @@ const Query = queryType({
           let listCollections = await db.listCollections().toArray()
 
           const listCount = await Promise.all(
-            listCollections.map(collection =>
+            listCollections.map((collection) =>
               db.collection(collection.name).countDocuments(),
             ),
           )
@@ -170,10 +167,7 @@ const Mutation = mutationType({
         const client = new MongoClient(uri)
         try {
           await client.connect()
-          await client
-            .db()
-            .admin()
-            .listDatabases()
+          await client.db().admin().listDatabases()
           return true
         } catch (error) {
           throw new Error('Failed to connect')

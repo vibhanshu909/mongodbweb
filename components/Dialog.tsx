@@ -1,17 +1,17 @@
 import React from 'react'
 import { useClickOutsideListenerRef } from '../hooks/useClickoutsideListenerRef'
 
-interface IDialog {
+export interface IDialogProps {
   onClose: () => void
   position?: 'center' | 'left' | 'top' | 'right' | 'bottom'
 }
 
-export const Dialog: React.FC<IDialog> = props => {
+export const Dialog: React.FC<IDialogProps> = (props) => {
   const { onClose, children } = props
   const { position = 'center' } = props
   const ref = useClickOutsideListenerRef(onClose)
   let classNames = ''
-  switch (position as IDialog['position']) {
+  switch (position as IDialogProps['position']) {
     case 'center':
       classNames = 'm-auto'
       break

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FaTrash } from 'react-icons/fa'
+import { FaTrashAlt } from 'react-icons/fa'
 import { ConfirmDialog } from './ConfirmDialog'
 import { IconButton } from './IconButton'
 
@@ -30,7 +30,7 @@ export const DeleteButton: React.FC<React.DetailedHTMLProps<
         {...props}
         onClick={handleOpen}
       >
-        <FaTrash />
+        <FaTrashAlt className='text-red-600' />
       </IconButton>
       {open && (
         <ConfirmDialog

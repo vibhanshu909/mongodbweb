@@ -1,17 +1,16 @@
 import React from 'react'
 import { Button } from './Button'
-import { Dialog } from './Dialog'
+import { Dialog, IDialogProps } from './Dialog'
 
-interface IConfirmDialog {
+export interface IConfirmDialog extends IDialogProps {
   title: any
-  onClose: () => void
   onPositive?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
   onNegative?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
   positiveBtn?: JSX.Element
   nagativeBtn?: JSX.Element
 }
 
-export const ConfirmDialog: React.FC<IConfirmDialog> = props => {
+export const ConfirmDialog: React.FC<IConfirmDialog> = (props) => {
   const {
     title,
     children,
@@ -24,9 +23,10 @@ export const ConfirmDialog: React.FC<IConfirmDialog> = props => {
       </Button>
     ),
     nagativeBtn = <Button onClick={onNegative}>No</Button>,
+    ...restProps
   } = props
   return (
-    <Dialog onClose={onClose}>
+    <Dialog onClose={onClose} {...restProps}>
       <div>
         <h1 className='text-gray-900 text-2xl'>{title}</h1>
       </div>
