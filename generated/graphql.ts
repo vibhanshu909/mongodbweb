@@ -98,8 +98,8 @@ export interface ICollection {
 
 export interface IFindInputType {
   query?: Maybe<Scalars['JSON']>;
-  skip?: Maybe<Scalars['Int']>;
-  limit?: Maybe<Scalars['Int']>;
+  skip: Scalars['Int'];
+  limit: Scalars['Int'];
   sort?: Maybe<Scalars['JSON']>;
 }
 

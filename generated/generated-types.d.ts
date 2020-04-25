@@ -23,9 +23,9 @@ declare global {
 
 export interface NexusGenInputs {
   FindInputType: { // input type
-    limit?: number | null; // Int
+    limit: number; // Int!
     query?: any | null; // JSON
-    skip?: number | null; // Int
+    skip: number; // Int!
     sort?: any | null; // JSON
   }
 }

@@ -13,9 +13,9 @@ type Database {
 }
 
 input FindInputType {
-  limit: Int = 20
+  limit: Int! = 20
   query: JSON
-  skip: Int = 0
+  skip: Int! = 0
   sort: JSON
 }
 

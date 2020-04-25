@@ -46,7 +46,7 @@ export const FindInputType = inputObjectType({
 const Query = queryType({
   definition(t) {
     t.boolean('checkServer', {
-      args: { uri: stringArg({ nullable: false }) },
+      args: { uri: stringArg() },
       resolve: async (_, { uri }) => {
         const client = new MongoClient(uri, {
           useNewUrlParser: true,
@@ -65,9 +65,8 @@ const Query = queryType({
     })
     t.list.field('listDatabases', {
       type: Database,
-      nullable: true,
       args: {
-        uri: stringArg({ nullable: false }),
+        uri: stringArg(),
       },
       resolve: async (_, { uri }) => {
         const client = new MongoClient(uri, {
@@ -84,13 +83,13 @@ const Query = queryType({
           await client.close()
         }
       },
+      nullable: true,
     })
     t.list.field('listCollections', {
       type: Collection,
-      nullable: true,
       args: {
-        uri: stringArg({ nullable: false }),
-        database: stringArg({ nullable: false }),
+        uri: stringArg(),
+        database: stringArg(),
       },
       resolve: async (_, { uri, database }) => {
         const client = new MongoClient(uri, {
@@ -118,13 +117,14 @@ const Query = queryType({
           await client.close()
         }
       },
+      nullable: true,
     })
     t.json('query', {
       args: {
-        uri: stringArg({ nullable: false }),
-        database: stringArg({ nullable: false }),
-        collection: stringArg({ nullable: false }),
-        params: FindInputType,
+        uri: stringArg(),
+        database: stringArg(),
+        collection: stringArg(),
+        params: arg({ type: FindInputType, nullable: true }),
       },
       async resolve(_, { uri, database, collection, params }) {
         const { query, ...rest } =
@@ -161,7 +161,7 @@ const Mutation = mutationType({
   definition(t) {
     t.json('addServer', {
       args: {
-        uri: stringArg({ nullable: false }),
+        uri: stringArg(),
       },
       resolve: async (_, { uri }) => {
         const client = new MongoClient(uri)
@@ -178,10 +178,10 @@ const Mutation = mutationType({
     })
     t.boolean('create', {
       args: {
-        uri: stringArg({ nullable: false }),
-        database: stringArg({ nullable: false }),
-        collection: stringArg({ nullable: false }),
-        document: arg({ type: 'JSON', nullable: false }),
+        uri: stringArg(),
+        database: stringArg(),
+        collection: stringArg(),
+        document: arg({ type: 'JSON' }),
       },
       resolve: async (_, args) => {
         const { uri, database, collection, document } = args
@@ -206,11 +206,11 @@ const Mutation = mutationType({
     })
     t.boolean('update', {
       args: {
-        uri: stringArg({ nullable: false }),
-        database: stringArg({ nullable: false }),
-        collection: stringArg({ nullable: false }),
-        id: idArg({ nullable: false }),
-        document: arg({ type: 'JSON', nullable: false }),
+        uri: stringArg(),
+        database: stringArg(),
+        collection: stringArg(),
+        id: idArg(),
+        document: arg({ type: 'JSON' }),
       },
       resolve: async (_, args) => {
         const { uri, database, collection, id, document } = args
@@ -248,10 +248,10 @@ const Mutation = mutationType({
 
     t.boolean('delete', {
       args: {
-        uri: stringArg({ nullable: false }),
-        database: stringArg({ nullable: false }),
-        collection: stringArg({ nullable: false }),
-        ids: idArg({ list: true, nullable: false }),
+        uri: stringArg(),
+        database: stringArg(),
+        collection: stringArg(),
+        ids: idArg({ list: true }),
       },
       resolve: async (_, args) => {
         const { uri, database, collection, ids } = args
@@ -288,6 +288,7 @@ const schema = makeSchema({
     schema: path.join(process.cwd(), 'generated/schema.graphql'),
     typegen: path.join(process.cwd(), 'generated/generated-types.d.ts'),
   },
+  nonNullDefaults: { input: true, output: true },
 })
 
 const server = new ApolloServer({
