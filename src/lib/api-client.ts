@@ -1,5 +1,7 @@
+import { type MongoDocument } from '@/types'
+
 // API Response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = MongoDocument> {
   success: boolean
   data?: T
   error?: string
@@ -16,10 +18,10 @@ export interface Collection {
 }
 
 export interface QueryParams {
-  query?: Record<string, any>
+  query?: Record<string, unknown>
   skip?: number
   limit?: number
-  sort?: Record<string, any>
+  sort?: Record<string, unknown>
 }
 
 // Base API client class
@@ -31,11 +33,11 @@ class ApiClient {
   }
 
   private async request<T>(
-    endpoint: string, 
+    endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`
-    
+
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -63,7 +65,7 @@ class ApiClient {
   }
 
   async listCollections(
-    uri: string, 
+    uri: string,
     database: string
   ): Promise<ApiResponse<Collection[]>> {
     return this.request<Collection[]>('/collections', {
@@ -77,8 +79,8 @@ class ApiClient {
     database: string,
     collection: string,
     params?: QueryParams
-  ): Promise<ApiResponse<any[]>> {
-    return this.request<any[]>('/documents/query', {
+  ): Promise<ApiResponse<MongoDocument[]>> {
+    return this.request<MongoDocument[]>('/documents/query', {
       method: 'POST',
       body: JSON.stringify({ uri, database, collection, params }),
     })
@@ -87,8 +89,7 @@ class ApiClient {
   async createDocument(
     uri: string,
     database: string,
-    collection: string,
-    document: Record<string, any>
+    document: MongoDocument
   ): Promise<ApiResponse<boolean>> {
     return this.request<boolean>('/documents/create', {
       method: 'POST',
@@ -101,7 +102,7 @@ class ApiClient {
     database: string,
     collection: string,
     id: string,
-    document: Record<string, any>
+    document: MongoDocument
   ): Promise<ApiResponse<boolean>> {
     return this.request<boolean>('/documents/update', {
       method: 'PUT',

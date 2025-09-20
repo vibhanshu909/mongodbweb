@@ -1,9 +1,9 @@
 'use client'
 
+import { Server, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
-import { Server, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function ServerManager() {
@@ -23,7 +23,9 @@ export function ServerManager() {
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-medium text-muted-foreground mb-2">Servers</h3>
+      <h3 className="text-sm font-medium text-muted-foreground mb-2">
+        Servers
+      </h3>
       {servers.map((server) => (
         <Card
           key={server.id}

@@ -23,9 +23,9 @@ export default async function handler(
   const { uri, database } = req.body
 
   if (!uri || !database) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'URI and database are required' 
+    return res.status(400).json({
+      success: false,
+      error: 'URI and database are required',
     })
   }
 
@@ -45,15 +45,15 @@ export default async function handler(
       })
     )
 
-    res.status(200).json({ 
-      success: true, 
-      data: collectionsWithCount 
+    res.status(200).json({
+      success: true,
+      data: collectionsWithCount,
     })
   } catch (error) {
     console.error('List collections error:', error)
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to list collections' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to list collections',
     })
   } finally {
     await client.close()

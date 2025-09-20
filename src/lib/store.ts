@@ -16,31 +16,38 @@ export interface CollectionTab {
   isActive: boolean
 }
 
+export type Theme = 'light' | 'dark' | 'system'
+
 interface AppState {
   // Server management
   servers: Server[]
   activeServer: Server | null
-  
+
   // Collection tabs
   tabs: CollectionTab[]
   activeTabId: string | null
-  
+
   // UI state
   isLoading: boolean
   error: string | null
-  
+
+  // Theme
+  theme: Theme
+
   // Actions
   addServer: (uri: string, name?: string) => void
   removeServer: (id: string) => void
   setActiveServer: (server: Server | null) => void
-  
+
   addTab: (server: string, database: string, collection: string) => void
   removeTab: (id: string) => void
   setActiveTab: (id: string) => void
-  
+
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   clearError: () => void
+
+  setTheme: (theme: Theme) => void
 }
 
 export const useAppStore = create<AppState>()(
@@ -54,6 +61,7 @@ export const useAppStore = create<AppState>()(
         activeTabId: null,
         isLoading: false,
         error: null,
+        theme: 'system',
 
         // Server actions
         addServer: (uri: string, name?: string) => {
@@ -63,7 +71,7 @@ export const useAppStore = create<AppState>()(
             name: name || new URL(uri).hostname,
             isActive: false,
           }
-          
+
           set((state) => ({
             servers: [...state.servers, server],
           }))
@@ -72,7 +80,8 @@ export const useAppStore = create<AppState>()(
         removeServer: (id: string) =>
           set((state) => ({
             servers: state.servers.filter((s) => s.id !== id),
-            activeServer: state.activeServer?.id === id ? null : state.activeServer,
+            activeServer:
+              state.activeServer?.id === id ? null : state.activeServer,
             tabs: state.tabs.filter((t) => t.server !== id),
           })),
 
@@ -84,9 +93,12 @@ export const useAppStore = create<AppState>()(
         // Tab actions
         addTab: (server: string, database: string, collection: string) => {
           const existingTab = get().tabs.find(
-            (t) => t.server === server && t.database === database && t.collection === collection
+            (t) =>
+              t.server === server &&
+              t.database === database &&
+              t.collection === collection
           )
-          
+
           if (existingTab) {
             set(() => ({
               activeTabId: existingTab.id,
@@ -103,7 +115,10 @@ export const useAppStore = create<AppState>()(
           }
 
           set((state) => ({
-            tabs: [...state.tabs.map((t) => ({ ...t, isActive: false })), newTab],
+            tabs: [
+              ...state.tabs.map((t) => ({ ...t, isActive: false })),
+              newTab,
+            ],
             activeTabId: newTab.id,
           }))
         },
@@ -112,7 +127,7 @@ export const useAppStore = create<AppState>()(
           const state = get()
           const tabIndex = state.tabs.findIndex((t) => t.id === id)
           const newTabs = state.tabs.filter((t) => t.id !== id)
-          
+
           let newActiveTabId = state.activeTabId
           if (state.activeTabId === id && newTabs.length > 0) {
             // Set new active tab to the one before the removed tab, or the first one
@@ -152,6 +167,11 @@ export const useAppStore = create<AppState>()(
           set(() => ({
             error: null,
           })),
+
+        setTheme: (theme: Theme) =>
+          set(() => ({
+            theme,
+          })),
       }),
       {
         name: 'mongodb-web-store',
@@ -159,6 +179,7 @@ export const useAppStore = create<AppState>()(
           servers: state.servers,
           tabs: state.tabs,
           activeTabId: state.activeTabId,
+          theme: state.theme,
         }),
       }
     ),

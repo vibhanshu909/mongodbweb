@@ -17,9 +17,9 @@ export default async function handler(
   const { uri, database, collection, document } = req.body
 
   if (!uri || !database || !collection || !document) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'URI, database, collection, and document are required' 
+    return res.status(400).json({
+      success: false,
+      error: 'URI, database, collection, and document are required',
     })
   }
 
@@ -28,15 +28,15 @@ export default async function handler(
     await client.connect()
     const db = client.db(database)
     const result = await db.collection(collection).insertOne(document)
-    
-    res.status(200).json({ 
-      success: !!result.acknowledged 
+
+    res.status(200).json({
+      success: !!result.acknowledged,
     })
   } catch (error) {
     console.error('Create error:', error)
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to create document' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create document',
     })
   } finally {
     await client.close()

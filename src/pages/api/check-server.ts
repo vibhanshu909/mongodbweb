@@ -27,9 +27,9 @@ export default async function handler(
     res.status(200).json({ success: true })
   } catch (error) {
     console.error('Connection error:', error)
-    res.status(400).json({ 
-      success: false, 
-      error: 'Failed to connect to server' 
+    res.status(400).json({
+      success: false,
+      error: 'Failed to connect to server',
     })
   } finally {
     await client.close()

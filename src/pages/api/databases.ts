@@ -30,18 +30,18 @@ export default async function handler(
   try {
     await client.connect()
     const dbList = await client.db().admin().listDatabases()
-    res.status(200).json({ 
-      success: true, 
-      data: dbList.databases.map(db => ({
+    res.status(200).json({
+      success: true,
+      data: dbList.databases.map((db) => ({
         name: db.name,
-        empty: db.empty ?? false
-      }))
+        empty: db.empty ?? false,
+      })),
     })
   } catch (error) {
     console.error('List databases error:', error)
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to list databases' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to list databases',
     })
   } finally {
     await client.close()

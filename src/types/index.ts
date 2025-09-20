@@ -10,14 +10,14 @@ export interface Collection {
 
 export interface MongoDocument {
   _id: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface FindParams {
-  query?: Record<string, any>
+  query?: Record<string, unknown>
   skip?: number
   limit?: number
-  sort?: Record<string, any>
+  sort?: Record<string, unknown>
 }
 
 export interface ServerConnection {
@@ -41,7 +41,7 @@ export interface Tab {
 export interface AppError {
   message: string
   code?: string
-  details?: any
+  details?: unknown
 }
 
 // Form types
@@ -86,10 +86,10 @@ export type QueryResult<T> = {
 }
 
 export type MutationResult<T> = [
-  (variables: any) => Promise<any>,
+  (variables: unknown) => Promise<unknown>,
   {
     data?: T
     loading: boolean
     error?: Error
-  }
+  },
 ]

@@ -1,16 +1,17 @@
 import { MongoClient } from 'mongodb'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { type MongoDocument } from '@/types'
 
 type QueryParams = {
-  query?: Record<string, any>
+  query?: Record<string, unknown>
   skip?: number
   limit?: number
-  sort?: Record<string, any>
+  sort?: Record<string, unknown>
 }
 
 type Data = {
   success: boolean
-  data?: any[]
+  data?: MongoDocument[]
   error?: string
 }
 
@@ -26,9 +27,9 @@ export default async function handler(
   const { query = {}, skip = 0, limit = 20, sort = {} }: QueryParams = params
 
   if (!uri || !database || !collection) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'URI, database, and collection are required' 
+    return res.status(400).json({
+      success: false,
+      error: 'URI, database, and collection are required',
     })
   }
 
@@ -44,15 +45,15 @@ export default async function handler(
       .sort(sort)
       .toArray()
 
-    res.status(200).json({ 
-      success: true, 
-      data: documents 
+    res.status(200).json({
+      success: true,
+      data: documents,
     })
   } catch (error) {
     console.error('Query error:', error)
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to query collection' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to query collection',
     })
   } finally {
     await client.close()

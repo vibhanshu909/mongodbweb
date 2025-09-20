@@ -1,48 +1,40 @@
 'use client'
 
+import { FileText, Loader2, Plus, Search, X } from 'lucide-react'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { useAppStore } from '@/lib/store'
-import { useQueryDocuments } from '@/hooks/useApi'
 import { useToast } from '@/hooks/use-toast'
-import { X, FileText, Loader2, Plus, Search } from 'lucide-react'
+import { useQueryDocuments } from '@/hooks/useApi'
+import { useAppStore } from '@/lib/store'
 
 export function CollectionViewer() {
   const { tabs, activeTabId, setActiveTab, removeTab, servers } = useAppStore()
   const { data: documents, loading, queryDocuments } = useQueryDocuments()
   const { toast } = useToast()
 
-  const activeTab = tabs.find(tab => tab.id === activeTabId)
+  const activeTab = tabs.find((tab) => tab.id === activeTabId)
 
   useEffect(() => {
-    if (activeTab) {
-      loadDocuments()
-    }
-  }, [activeTab])
-
-  const loadDocuments = async () => {
     if (!activeTab) return
 
-    const server = servers.find(s => s.id === activeTab.server)
+    const server = servers.find((s) => s.id === activeTab.server)
     if (!server) return
 
-    try {
-      await queryDocuments(server.uri, activeTab.database, activeTab.collection, {
-        query: {},
-        limit: 50,
-        skip: 0,
-      })
-    } catch (error) {
+    queryDocuments(server.uri, activeTab.database, activeTab.collection, {
+      query: {},
+      limit: 50,
+      skip: 0,
+    }).catch(() =>
       toast({
         title: 'Error',
         description: 'Failed to load documents',
         variant: 'destructive',
       })
-    }
-  }
+    )
+  }, [activeTab, servers, queryDocuments, toast])
 
   if (tabs.length === 0) {
     return (

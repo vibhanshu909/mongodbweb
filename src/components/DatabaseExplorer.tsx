@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Database, FileText, Folder, Loader2 } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAppStore, type Server } from '@/lib/store'
-import { useListDatabases, useListCollections } from '@/hooks/useApi'
 import { useToast } from '@/hooks/use-toast'
-import { Database, Folder, FileText, Loader2 } from 'lucide-react'
+import { useListCollections, useListDatabases } from '@/hooks/useApi'
+import { type Server, useAppStore } from '@/lib/store'
 import { CollectionViewer } from './CollectionViewer'
 
 interface DatabaseExplorerProps {
@@ -16,45 +16,53 @@ interface DatabaseExplorerProps {
 export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
   const [selectedDatabase, setSelectedDatabase] = useState<string | null>(null)
   const { addTab } = useAppStore()
-  const { data: databases, loading: loadingDatabases, listDatabases } = useListDatabases()
-  const { data: collections, loading: loadingCollections, listCollections } = useListCollections()
+  const {
+    data: databases,
+    loading: loadingDatabases,
+    listDatabases,
+  } = useListDatabases()
+  const {
+    data: collections,
+    loading: loadingCollections,
+    listCollections,
+  } = useListCollections()
   const { toast } = useToast()
 
-  useEffect(() => {
-    loadDatabases()
-  }, [server])
-
-  useEffect(() => {
-    if (selectedDatabase) {
-      loadCollections()
-    }
-  }, [selectedDatabase])
-
-  const loadDatabases = async () => {
+  const loadDatabases = useCallback(async () => {
     try {
       await listDatabases(server.uri)
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to load databases',
         variant: 'destructive',
       })
     }
-  }
+  }, [listDatabases, server.uri, toast])
 
-  const loadCollections = async () => {
+  const loadCollections = useCallback(async () => {
     if (!selectedDatabase) return
-    
+
     try {
       await listCollections(server.uri, selectedDatabase)
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to load collections',
         variant: 'destructive',
       })
     }
-  }
+  }, [listCollections, selectedDatabase, server.uri, toast])
+
+  useEffect(() => {
+    loadDatabases()
+  }, [loadDatabases])
+
+  useEffect(() => {
+    if (selectedDatabase) {
+      loadCollections()
+    }
+  }, [selectedDatabase, loadCollections])
 
   const handleCollectionClick = (collection: string) => {
     if (selectedDatabase) {
