@@ -41,11 +41,10 @@ export default async function handler(
     return res.status(200).json({ success: true })
   } catch (error: unknown) {
     // Narrow unknown to provide safe messaging
-    const errMsg =
-      typeof error === 'object' && error !== null && 'message' in error
-        ? // @ts-expect-error - readonly access to possible message
-          (error as { message?: unknown }).message
-        : String(error)
+    let errMsg: unknown = error
+    if (error instanceof Error) {
+      errMsg = error.message
+    }
     console.error('Connection error:', errMsg)
 
     // Map some common error cases to friendlier messages
