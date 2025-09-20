@@ -132,3 +132,59 @@
 .tab-inactive {
   @apply bg-secondary text-secondary-foreground hover:bg-accent;
 }
+
+/* react-json-view / jsoneditor theme overrides to improve contrast in dark mode */
+/* Use design system variables so colors switch with .dark class */
+.react-json-view, .react-json-view * {
+  background: transparent !important;
+  color: rgb(var(--foreground)) !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+}
+
+.react-json-view .string-value,
+.react-json-view .string,
+.react-json-view .prop-string,
+.react-json-view .prop-string .string,
+.react-json-view .prop-value .string,
+.react-json-view .value .string {
+  color: hsl(142 76% 36%) !important; /* green for strings */
+}
+.react-json-view .number-value,
+.react-json-view .number,
+.react-json-view .num,
+.react-json-view .prop-value .number,
+.react-json-view .value .number {
+  color: hsl(var(--destructive)) !important; /* reddish for numbers */
+}
+.react-json-view .boolean-value,
+.react-json-view .boolean,
+.react-json-view .prop-value .boolean,
+.react-json-view .value .boolean {
+  color: hsl(25 95% 53%) !important; /* orange for booleans */
+}
+.react-json-view .null-value,
+.react-json-view .null,
+.react-json-view .prop-value .null,
+.react-json-view .value .null {
+  color: rgb(var(--primary)) !important; /* blue for null */
+}
+.react-json-view .property-name,
+.react-json-view .prop-name,
+.react-json-view .prop {
+  color: rgb(var(--muted-foreground)) !important;
+}
+.react-json-view .collapsible, .react-json-view .object, .react-json-view .array {
+  color: rgb(var(--foreground)) !important;
+}
+
+/* Improve background and border contrast for the JSON viewer container */
+.jsonviewer, .react-json-view--root, .jsoneditor, .jsoneditor-tree {
+  background-color: rgb(var(--card)) !important;
+  color: rgb(var(--card-foreground)) !important;
+  border: 1px solid rgb(var(--border)) !important;
+}
+
+/* Small tweak for preview text and clipboard hint */
+.react-json-view .preview-value, .react-json-view .react-json-view__clipboard__btn {
+  color: rgb(var(--muted-foreground)) !important;
+}

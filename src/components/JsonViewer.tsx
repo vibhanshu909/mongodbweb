@@ -13,7 +13,10 @@ type JsonPrimitive = string | number | boolean | null
 type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue }
 
 interface JsonViewerProps {
-  data: JsonValue
+  // Accept any here to allow document shapes from the app (MongoDocument, etc.)
+  // We still use runtime checks before rendering. This keeps the component flexible
+  // while avoiding build-time type errors when passing repository-specific types.
+  data: any
   className?: string
   maxDepth?: number
   defaultExpanded?: boolean
@@ -125,20 +128,20 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
         {filteredData !== undefined ? (
           (typeof filteredData === 'object' && filteredData !== null) ? (
             // react-json-view expects an object/array
-            // @ts-expect-error - react-json-view typings are loose for dynamic import
             <ReactJson
-              src={filteredData as object}
-            name={null}
-            collapsed={defaultExpanded ? false : maxDepth}
-            collapseStringsAfterLength={120}
-            enableClipboard={true}
-            displayDataTypes={false}
-            indentWidth={2}
-            sortKeys={true}
-            style={{
-              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-            }}
-          />
+              // cast to unknown->object for react-json-view runtime API
+              src={filteredData as unknown as object}
+              name={null}
+              collapsed={defaultExpanded ? false : maxDepth}
+              collapseStringsAfterLength={120}
+              enableClipboard={true}
+              displayDataTypes={false}
+              indentWidth={2}
+              sortKeys={true}
+              style={{
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+              }}
+            />
           ) : (
             <pre className="text-sm">{String(filteredData)}</pre>
           )

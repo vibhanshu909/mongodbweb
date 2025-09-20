@@ -108,8 +108,11 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
     }
   }
 
-  const { state: contextMenu, open: openContextMenu, close: closeContextMenu } =
-    useContextMenu<{ database?: string }>()
+  const {
+    state: contextMenu,
+    open: openContextMenu,
+    close: closeContextMenu,
+  } = useContextMenu<{ database?: string }>()
 
   const handleCreateCollection = useCallback(
     async (database: string, collectionName: string) => {
@@ -214,25 +217,25 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
                     onClick={() => setSelectedDatabase(db.name)}
                   >
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <Database className="h-4 w-4" />
-                        {db.name}
-                        <div className="ml-auto">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0"
-                            onClick={(e: React.MouseEvent<HTMLElement>) =>
-                              openContextMenu(e, {
-                                width: 224,
-                                height: 120,
-                                data: { database: db.name },
-                              })
-                            }
-                          >
-                            <MoreHorizontal className="h-3 w-3" />
-                          </Button>
+                      <CardTitle className="text-sm flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Database className="h-4 w-4" />
+                          {db.name}
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={(e: React.MouseEvent<HTMLElement>) =>
+                            openContextMenu(e, {
+                              width: 224,
+                              height: 120,
+                              data: { database: db.name },
+                            })
+                          }
+                        >
+                          <MoreHorizontal className="h-3 w-3" />
+                        </Button>
                       </CardTitle>
                     </CardHeader>
                   </Card>
@@ -241,53 +244,62 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
             </div>
           )}
 
-            {contextMenu.visible && (
-              <div
-                role="menu"
-                tabIndex={-1}
-                onKeyDown={(e) => {
-                  // close on Escape
-                  if (e.key === 'Escape') {
-                    e.stopPropagation()
-                    closeContextMenu()
-                  }
+          {contextMenu.visible && (
+            <div
+              role="menu"
+              tabIndex={-1}
+              onKeyDown={(e) => {
+                // close on Escape
+                if (e.key === 'Escape') {
+                  e.stopPropagation()
+                  closeContextMenu()
+                }
+              }}
+              className="fixed z-50 bg-popover rounded-md border border-border shadow-lg py-1 w-56"
+              style={{ left: contextMenu.x, top: contextMenu.y }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="w-full text-left px-3 py-2 hover:bg-accent/10 text-sm"
+                onClick={() => {
+                  setCreateCollectionDialog({
+                    open: true,
+                    database: contextMenu.data?.database || '',
+                  })
+                  closeContextMenu()
                 }}
-                className="fixed z-50 bg-popover rounded-md border border-border shadow-lg py-1 w-56"
-                style={{ left: contextMenu.x, top: contextMenu.y }}
-                onClick={(e) => e.stopPropagation()}
               >
-                <button
-                  type="button"
-                  className="w-full text-left px-3 py-2 hover:bg-accent/10 text-sm"
-                  onClick={() => {
-                    setCreateCollectionDialog({ open: true, database: contextMenu.data?.database || '' })
-                    closeContextMenu()
-                  }}
-                >
-                  Create Collection
-                </button>
-                <button
-                  type="button"
-                  className="w-full text-left px-3 py-2 hover:bg-muted/10 text-sm"
-                  onClick={() => {
-                    setRenameDatabaseDialog({ open: true, database: contextMenu.data?.database || '' })
-                    closeContextMenu()
-                  }}
-                >
-                  Rename Database
-                </button>
-                <button
-                  type="button"
-                  className="w-full text-left px-3 py-2 hover:bg-destructive/10 text-sm text-destructive"
-                  onClick={() => {
-                    setDeleteDatabaseDialog({ open: true, database: contextMenu.data?.database || '' })
-                    closeContextMenu()
-                  }}
-                >
-                  Delete Database
-                </button>
-              </div>
-            )}
+                Create Collection
+              </button>
+              <button
+                type="button"
+                className="w-full text-left px-3 py-2 hover:bg-muted/10 text-sm"
+                onClick={() => {
+                  setRenameDatabaseDialog({
+                    open: true,
+                    database: contextMenu.data?.database || '',
+                  })
+                  closeContextMenu()
+                }}
+              >
+                Rename Database
+              </button>
+              <button
+                type="button"
+                className="w-full text-left px-3 py-2 hover:bg-destructive/10 text-sm text-destructive"
+                onClick={() => {
+                  setDeleteDatabaseDialog({
+                    open: true,
+                    database: contextMenu.data?.database || '',
+                  })
+                  closeContextMenu()
+                }}
+              >
+                Delete Database
+              </button>
+            </div>
+          )}
 
           {selectedDatabase && (
             <div className="pt-4 border-t">
