@@ -1,223 +1,19 @@
 'use client'
 
 import React, { useState, useCallback, useMemo } from 'react'
-import { ChevronRight, ChevronDown, Copy, Search, EyeOff } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { Copy, Search, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+const ReactJson = dynamic(() => import('react-json-view'), { ssr: false })
 
 interface JsonViewerProps {
   data: any
   className?: string
   maxDepth?: number
   defaultExpanded?: boolean
-}
-
-interface JsonNodeProps {
-  data: any
-  name?: string
-  depth: number
-  maxDepth: number
-  defaultExpanded: boolean
-  searchTerm?: string
-  onCopy?: (value: string) => void
-}
-
-const JsonValue: React.FC<{
-  value: any
-  onCopy?: (value: string) => void
-  searchTerm?: string
-}> = ({ value, onCopy, searchTerm }) => {
-  const { toast } = useToast()
-
-  const handleCopy = useCallback(() => {
-    const text = typeof value === 'string' ? `"${value}"` : String(value)
-    navigator.clipboard.writeText(text)
-    toast({
-      title: 'Copied!',
-      description: 'Value copied to clipboard',
-    })
-    onCopy?.(text)
-  }, [value, onCopy, toast])
-
-  const highlightText = (text: string, searchTerm: string) => {
-    if (!searchTerm) return text
-
-    const regex = new RegExp(`(${searchTerm})`, 'gi')
-    const parts = text.split(regex)
-
-    return parts.map((part, index) =>
-      regex.test(part) ? (
-        <span
-          key={index}
-          className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded"
-        >
-          {part}
-        </span>
-      ) : (
-        part
-      )
-    )
-  }
-
-  if (value === null) {
-    return (
-      <span className="text-gray-500 italic">
-        {highlightText('null', searchTerm || '')}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-4 w-4 p-0 ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={handleCopy}
-        >
-          <Copy className="h-3 w-3" />
-        </Button>
-      </span>
-    )
-  }
-
-  if (typeof value === 'boolean') {
-    return (
-      <span className="text-blue-600 dark:text-blue-400">
-        {highlightText(String(value), searchTerm || '')}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-4 w-4 p-0 ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={handleCopy}
-        >
-          <Copy className="h-3 w-3" />
-        </Button>
-      </span>
-    )
-  }
-
-  if (typeof value === 'number') {
-    return (
-      <span className="text-green-600 dark:text-green-400">
-        {highlightText(String(value), searchTerm || '')}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-4 w-4 p-0 ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={handleCopy}
-        >
-          <Copy className="h-3 w-3" />
-        </Button>
-      </span>
-    )
-  }
-
-  if (typeof value === 'string') {
-    return (
-      <span className="text-red-600 dark:text-red-400 group">
-        "{highlightText(value, searchTerm || '')}"
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-4 w-4 p-0 ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={handleCopy}
-        >
-          <Copy className="h-3 w-3" />
-        </Button>
-      </span>
-    )
-  }
-
-  return <span>{String(value)}</span>
-}
-
-const JsonNode: React.FC<JsonNodeProps> = ({
-  data,
-  name,
-  depth,
-  maxDepth,
-  defaultExpanded,
-  searchTerm,
-  onCopy,
-}) => {
-  const [isExpanded, setIsExpanded] = useState(
-    depth < 2 && defaultExpanded && depth < maxDepth
-  )
-
-  const isObject = data !== null && typeof data === 'object'
-  const isArray = Array.isArray(data)
-  const shouldCollapse = depth >= maxDepth
-
-  const toggleExpanded = useCallback(() => {
-    setIsExpanded(!isExpanded)
-  }, [isExpanded])
-
-  if (!isObject || shouldCollapse) {
-    return (
-      <div className="flex items-start gap-2 py-0.5">
-        {name && (
-          <span className="text-purple-600 dark:text-purple-400 font-medium">
-            "{name}":
-          </span>
-        )}
-        <JsonValue value={data} onCopy={onCopy} searchTerm={searchTerm} />
-      </div>
-    )
-  }
-
-  const entries = Object.entries(data)
-  const itemCount = isArray ? data.length : entries.length
-
-  return (
-    <div className="py-0.5">
-      <div
-        className="flex items-center gap-1 cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5 -mx-1 group"
-        onClick={toggleExpanded}
-      >
-        {isExpanded ? (
-          <ChevronDown className="h-3 w-3 text-muted-foreground" />
-        ) : (
-          <ChevronRight className="h-3 w-3 text-muted-foreground" />
-        )}
-        {name && (
-          <span className="text-purple-600 dark:text-purple-400 font-medium">
-            "{name}":
-          </span>
-        )}
-        <span className="text-orange-600 dark:text-orange-400">
-          {isArray ? '[' : '{'}
-        </span>
-        <span className="text-muted-foreground text-xs">
-          {itemCount} {isArray ? 'items' : 'properties'}
-        </span>
-        <span className="text-orange-600 dark:text-orange-400">
-          {isExpanded ? (isArray ? '[' : '{') : isArray ? '...' : '...'}
-        </span>
-        {!isExpanded && (
-          <span className="text-orange-600 dark:text-orange-400">
-            {isArray ? ']' : '}'}
-          </span>
-        )}
-      </div>
-
-      {isExpanded && (
-        <div className="ml-4 border-l border-muted pl-2">
-          {entries.map(([key, value]) => (
-            <JsonNode
-              key={key}
-              data={value}
-              name={isArray ? undefined : key}
-              depth={depth + 1}
-              maxDepth={maxDepth}
-              defaultExpanded={defaultExpanded}
-              searchTerm={searchTerm}
-              onCopy={onCopy}
-            />
-          ))}
-          <div className="text-orange-600 dark:text-orange-400">
-            {isArray ? ']' : '}'}
-          </div>
-        </div>
-      )}
-    </div>
-  )
 }
 
 export const JsonViewer: React.FC<JsonViewerProps> = ({
@@ -231,12 +27,18 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
   const { toast } = useToast()
 
   const handleCopyAll = useCallback(() => {
-    const jsonString = JSON.stringify(data, null, 2)
-    navigator.clipboard.writeText(jsonString)
-    toast({
-      title: 'Copied!',
-      description: 'Full JSON copied to clipboard',
-    })
+    try {
+      const jsonString = JSON.stringify(data, null, 2)
+      navigator.clipboard.writeText(jsonString)
+      toast({
+        title: 'Copied!',
+        description: 'Full JSON copied to clipboard',
+      })
+    } catch (err) {
+      // fallback for circular refs
+      navigator.clipboard.writeText(String(data))
+      toast({ title: 'Copied!', description: 'Copied (string fallback)' })
+    }
   }, [data, toast])
 
   const filteredData = useMemo(() => {
@@ -318,13 +120,19 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 
       <div className="p-3 max-h-96 overflow-auto font-mono text-sm">
         {filteredData !== undefined ? (
-          <JsonNode
-            data={filteredData}
-            depth={0}
-            maxDepth={maxDepth}
-            defaultExpanded={defaultExpanded}
-            searchTerm={searchTerm}
-            onCopy={handleCopyAll}
+          // @ts-ignore react-json-view typing is a bit loose; dynamic import helps
+          <ReactJson
+            src={filteredData}
+            name={null}
+            collapsed={defaultExpanded ? false : maxDepth}
+            collapseStringsAfterLength={120}
+            enableClipboard={true}
+            displayDataTypes={false}
+            indentWidth={2}
+            sortKeys={true}
+            style={{
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+            }}
           />
         ) : (
           <div className="text-center text-muted-foreground py-8">

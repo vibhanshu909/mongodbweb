@@ -2,7 +2,7 @@ import { MongoClient } from 'mongodb'
 import type { MongoClientOptions } from 'mongodb'
 
 type ClientEntry = {
-  client: MongoClient
+  client?: MongoClient
   lastUsed: number
   // promise while connecting to avoid duplicate connects
   connecting?: Promise<MongoClient>
@@ -10,7 +10,15 @@ type ClientEntry = {
 
 const MAX_ENTRIES = 50
 
-const clients: Map<string, ClientEntry> = new Map()
+// Persist the clients map on globalThis so it survives Next.js HMR in dev.
+// This prevents creating a new Map on every module reload which would
+// otherwise force reconnecting to MongoDB on each request during dev.
+declare global {
+  // eslint-disable-next-line no-var
+  var __mongo_clients__: Map<string, ClientEntry> | undefined
+}
+
+const clients: Map<string, ClientEntry> = globalThis.__mongo_clients__ ||= new Map()
 
 function touch(key: string) {
   const entry = clients.get(key)
@@ -31,7 +39,7 @@ async function evictIfNeeded() {
     const entry = clients.get(oldestKey)
     if (entry) {
       try {
-        await entry.client.close()
+        if (entry.client) await entry.client.close()
       } catch (err) {
         // ignore close errors
         // eslint-disable-next-line no-console
@@ -52,21 +60,27 @@ export async function getClient(uri: string, options?: MongoClientOptions): Prom
     // if already connected or connecting, wait/return
     if (existing.connecting) {
       const client = await existing.connecting
-      touch(uri)
+      touch(key)
       return client
     }
     touch(key)
-    return existing.client
+    // eslint-disable-next-line no-console
+    console.log(`[mongo] Reusing existing MongoDB client for ${uri}`)
+    // existing.client should be present here
+    return existing.client as MongoClient
   }
 
   // create placeholder entry with connecting promise
   const entry: ClientEntry = {
-    client: null as unknown as MongoClient,
     lastUsed: Date.now(),
   }
   const connecting = (async () => {
+    // eslint-disable-next-line no-console
+    console.log(`[mongo] Connecting to MongoDB: ${uri}`)
     const client = options ? new MongoClient(uri, options) : new MongoClient(uri)
     await client.connect()
+    // eslint-disable-next-line no-console
+    console.log(`[mongo] Connected: ${uri}`)
     entry.client = client
     entry.connecting = undefined
     return client
@@ -74,6 +88,8 @@ export async function getClient(uri: string, options?: MongoClientOptions): Prom
 
   entry.connecting = connecting
   clients.set(key, entry)
+  // eslint-disable-next-line no-console
+  console.log(`[mongo] Created cache entry for ${key} (cache size: ${clients.size})`)
   try {
     const client = await connecting
     // enforce cache size
@@ -99,7 +115,7 @@ export async function closeUri(uri: string, options?: MongoClientOptions) {
       // wait for connect to finish
       await entry.connecting
     }
-    await entry.client.close()
+    if (entry.client) await entry.client.close()
   } finally {
     clients.delete(key)
   }
@@ -111,7 +127,7 @@ export async function closeAll() {
     const p = (async () => {
       try {
         if (entry.connecting) await entry.connecting
-        await entry.client.close()
+        if (entry.client) await entry.client.close()
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error('Error closing MongoClient', err)

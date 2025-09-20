@@ -98,6 +98,17 @@ class ApiClient {
     })
   }
 
+  async createCollection(
+    uri: string,
+    database: string,
+    collection: string
+  ): Promise<ApiResponse<boolean>> {
+    return this.request<boolean>('/collections/create', {
+      method: 'POST',
+      body: JSON.stringify({ uri, database, collection }),
+    })
+  }
+
   async updateDocument(
     uri: string,
     database: string,
@@ -120,6 +131,27 @@ class ApiClient {
     return this.request<boolean>('/documents/delete', {
       method: 'DELETE',
       body: JSON.stringify({ uri, database, collection, ids }),
+    })
+  }
+
+  async deleteDatabase(
+    uri: string,
+    database: string
+  ): Promise<ApiResponse<boolean>> {
+    return this.request<boolean>('/databases/delete', {
+      method: 'DELETE',
+      body: JSON.stringify({ uri, database }),
+    })
+  }
+
+  async renameDatabase(
+    uri: string,
+    oldDatabase: string,
+    newDatabase: string
+  ): Promise<ApiResponse<boolean>> {
+    return this.request<boolean>('/databases/rename', {
+      method: 'PUT',
+      body: JSON.stringify({ uri, oldDatabase, newDatabase }),
     })
   }
 }

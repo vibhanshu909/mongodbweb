@@ -1,11 +1,39 @@
 'use client'
 
-import { Database, FileText, Folder, Loader2 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import {
+  Database,
+  FileText,
+  Loader2,
+  Plus,
+  Edit,
+  Trash2,
+} from 'lucide-react'
+import { useCallback, useEffect, useId, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
-import { useListCollections, useListDatabases } from '@/hooks/useApi'
+import {
+  useListCollections,
+  useListDatabases,
+  useDeleteDatabase,
+  useRenameDatabase,
+  useCreateCollection,
+} from '@/hooks/useApi'
 import { type Server, useAppStore } from '@/lib/store'
 import { CollectionViewer } from './CollectionViewer'
 
@@ -15,6 +43,23 @@ interface DatabaseExplorerProps {
 
 export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
   const [selectedDatabase, setSelectedDatabase] = useState<string | null>(null)
+  const [createCollectionDialog, setCreateCollectionDialog] = useState<{
+    open: boolean
+    database: string
+  }>({ open: false, database: '' })
+  const [renameDatabaseDialog, setRenameDatabaseDialog] = useState<{
+    open: boolean
+    database: string
+  }>({ open: false, database: '' })
+  const [deleteDatabaseDialog, setDeleteDatabaseDialog] = useState<{
+    open: boolean
+    database: string
+  }>({ open: false, database: '' })
+  const [collectionName, setCollectionName] = useState('')
+  const [newDatabaseName, setNewDatabaseName] = useState('')
+  const collectionId = useId()
+  const databaseId = useId()
+
   const { addTab } = useAppStore()
   const {
     data: databases,
@@ -26,6 +71,9 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
     loading: loadingCollections,
     listCollections,
   } = useListCollections()
+  const { createCollection } = useCreateCollection()
+  const { deleteDatabase } = useDeleteDatabase()
+  const { renameDatabase } = useRenameDatabase()
   const { toast } = useToast()
 
   const loadDatabases = useCallback(async () => {
@@ -70,6 +118,82 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
     }
   }
 
+  const handleCreateCollection = useCallback(
+    async (database: string, collectionName: string) => {
+      try {
+        await createCollection(server.uri, database, collectionName)
+        toast({
+          title: 'Success',
+          description: `Collection "${collectionName}" created successfully`,
+        })
+        // Refresh collections if the current database is selected
+        if (selectedDatabase === database) {
+          await listCollections(server.uri, database)
+        }
+        setCreateCollectionDialog({ open: false, database: '' })
+      } catch (_error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to create collection',
+          variant: 'destructive',
+        })
+      }
+    },
+    [createCollection, server.uri, selectedDatabase, listCollections, toast]
+  )
+
+  const handleRenameDatabase = useCallback(
+    async (oldName: string, newName: string) => {
+      try {
+        await renameDatabase(server.uri, oldName, newName)
+        toast({
+          title: 'Success',
+          description: `Database renamed from "${oldName}" to "${newName}"`,
+        })
+        // Refresh databases list
+        await listDatabases(server.uri)
+        // Update selected database if it was renamed
+        if (selectedDatabase === oldName) {
+          setSelectedDatabase(newName)
+        }
+        setRenameDatabaseDialog({ open: false, database: '' })
+      } catch (_error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to rename database',
+          variant: 'destructive',
+        })
+      }
+    },
+    [renameDatabase, server.uri, listDatabases, selectedDatabase, toast]
+  )
+
+  const handleDeleteDatabase = useCallback(
+    async (database: string) => {
+      try {
+        await deleteDatabase(server.uri, database)
+        toast({
+          title: 'Success',
+          description: `Database "${database}" deleted successfully`,
+        })
+        // Refresh databases list
+        await listDatabases(server.uri)
+        // Clear selection if deleted database was selected
+        if (selectedDatabase === database) {
+          setSelectedDatabase(null)
+        }
+        setDeleteDatabaseDialog({ open: false, database: '' })
+      } catch (_error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to delete database',
+          variant: 'destructive',
+        })
+      }
+    },
+    [deleteDatabase, server.uri, listDatabases, selectedDatabase, toast]
+  )
+
   return (
     <div className="flex h-full">
       {/* Database/Collection Browser */}
@@ -87,22 +211,61 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
           ) : (
             <div className="space-y-2">
               {databases.map((db) => (
-                <Card
-                  key={db.name}
-                  className={`cursor-pointer transition-colors ${
-                    selectedDatabase === db.name
-                      ? 'border-primary bg-primary/5'
-                      : 'hover:bg-muted/50'
-                  }`}
-                  onClick={() => setSelectedDatabase(db.name)}
-                >
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Folder className="h-4 w-4" />
-                      {db.name}
-                    </CardTitle>
-                  </CardHeader>
-                </Card>
+                <ContextMenu key={db.name}>
+                  <ContextMenuTrigger>
+                    <Card
+                      className={`cursor-pointer transition-colors ${
+                        selectedDatabase === db.name
+                          ? 'border-primary bg-primary/5'
+                          : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => setSelectedDatabase(db.name)}
+                    >
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <Database className="h-4 w-4" />
+                          {db.name}
+                        </CardTitle>
+                      </CardHeader>
+                    </Card>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuItem
+                      onClick={() =>
+                        setCreateCollectionDialog({
+                          open: true,
+                          database: db.name,
+                        })
+                      }
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Collection
+                    </ContextMenuItem>
+                    <ContextMenuItem
+                      onClick={() =>
+                        setRenameDatabaseDialog({
+                          open: true,
+                          database: db.name,
+                        })
+                      }
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Rename Database
+                    </ContextMenuItem>
+                    <ContextMenuItem
+                      onClick={() =>
+                        setDeleteDatabaseDialog({
+                          open: true,
+                          database: db.name,
+                        })
+                      }
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Database
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
               ))}
             </div>
           )}
@@ -145,6 +308,148 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
       <div className="flex-1">
         <CollectionViewer />
       </div>
+
+      {/* Create Collection Dialog */}
+      <Dialog
+        open={createCollectionDialog.open}
+        onOpenChange={(open) =>
+          setCreateCollectionDialog({
+            open,
+            database: createCollectionDialog.database,
+          })
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Collection</DialogTitle>
+            <DialogDescription>
+              Enter the name for the new collection in database "
+              {createCollectionDialog.database}".
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="collection-name" className="text-right">
+                Name
+              </label>
+              <Input
+                id={collectionId}
+                value={collectionName}
+                onChange={(e) => setCollectionName(e.target.value)}
+                className="col-span-3"
+                placeholder="Enter collection name"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="submit"
+              onClick={() => {
+                if (collectionName.trim()) {
+                  handleCreateCollection(
+                    createCollectionDialog.database,
+                    collectionName.trim()
+                  )
+                  setCollectionName('')
+                }
+              }}
+              disabled={!collectionName.trim()}
+            >
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rename Database Dialog */}
+      <Dialog
+        open={renameDatabaseDialog.open}
+        onOpenChange={(open) =>
+          setRenameDatabaseDialog({
+            open,
+            database: renameDatabaseDialog.database,
+          })
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename Database</DialogTitle>
+            <DialogDescription>
+              Enter the new name for database "{renameDatabaseDialog.database}".
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="database-name" className="text-right">
+                Name
+              </label>
+              <Input
+                id={databaseId}
+                value={newDatabaseName}
+                onChange={(e) => setNewDatabaseName(e.target.value)}
+                className="col-span-3"
+                placeholder="Enter new database name"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="submit"
+              onClick={() => {
+                if (newDatabaseName.trim()) {
+                  handleRenameDatabase(
+                    renameDatabaseDialog.database,
+                    newDatabaseName.trim()
+                  )
+                  setNewDatabaseName('')
+                }
+              }}
+              disabled={!newDatabaseName.trim()}
+            >
+              Rename
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Database Dialog */}
+      <Dialog
+        open={deleteDatabaseDialog.open}
+        onOpenChange={(open) =>
+          setDeleteDatabaseDialog({
+            open,
+            database: deleteDatabaseDialog.database,
+          })
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Database</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete database "
+              {deleteDatabaseDialog.database}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setDeleteDatabaseDialog({ open: false, database: '' })
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() =>
+                handleDeleteDatabase(deleteDatabaseDialog.database)
+              }
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

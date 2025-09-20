@@ -15,7 +15,9 @@ export function useApi<T>() {
   const [error, setError] = useState<string | null>(null)
 
   const execute = useCallback(
-    async (apiCall: () => Promise<ApiResponse<T>>): Promise<ApiResponse<T> | null> => {
+    async (
+      apiCall: () => Promise<ApiResponse<T>>
+    ): Promise<ApiResponse<T> | null> => {
       setLoading(true)
       setError(null)
 
@@ -28,7 +30,8 @@ export function useApi<T>() {
         }
         return response
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Network error occurred'
+        const message =
+          err instanceof Error ? err.message : 'Network error occurred'
         setError(message)
         return { success: false, error: message } as ApiResponse<T>
       } finally {
@@ -127,6 +130,21 @@ export function useCreateDocument() {
   return { success: data, loading, error, createDocument, reset }
 }
 
+export function useCreateCollection() {
+  const { data, loading, error, execute, reset } = useApi<boolean>()
+
+  const createCollection = useCallback(
+    (uri: string, database: string, collection: string) => {
+      return execute(() =>
+        apiClient.createCollection(uri, database, collection)
+      )
+    },
+    [execute]
+  )
+
+  return { success: data, loading, error, createCollection, reset }
+}
+
 export function useUpdateDocument() {
   const { data, loading, error, execute, reset } = useApi<boolean>()
 
@@ -161,4 +179,32 @@ export function useDeleteDocuments() {
   )
 
   return { success: data, loading, error, deleteDocuments, reset }
+}
+
+export function useDeleteDatabase() {
+  const { data, loading, error, execute, reset } = useApi<boolean>()
+
+  const deleteDatabase = useCallback(
+    (uri: string, database: string) => {
+      return execute(() => apiClient.deleteDatabase(uri, database))
+    },
+    [execute]
+  )
+
+  return { success: data, loading, error, deleteDatabase, reset }
+}
+
+export function useRenameDatabase() {
+  const { data, loading, error, execute, reset } = useApi<boolean>()
+
+  const renameDatabase = useCallback(
+    (uri: string, oldDatabase: string, newDatabase: string) => {
+      return execute(() =>
+        apiClient.renameDatabase(uri, oldDatabase, newDatabase)
+      )
+    },
+    [execute]
+  )
+
+  return { success: data, loading, error, renameDatabase, reset }
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Server, MoreHorizontal } from 'lucide-react'
+import { Database, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
@@ -95,7 +95,7 @@ export function ServerManager() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Server className="h-4 w-4" />
+                <Database className="h-4 w-4" />
                 <span className="truncate">
                   {server.name || new URL(server.uri).hostname}
                 </span>
@@ -119,8 +119,10 @@ export function ServerManager() {
       ))}
 
       {contextMenu.visible && (
+        // Use fixed positioning so the menu positions relative to the viewport
+        // (prevents parent stacking/scroll offsets from pushing it away from the pointer)
         <div
-          className="absolute z-50 bg-popover rounded-md border border-border shadow-lg py-1 w-56"
+          className="fixed z-50 bg-popover rounded-md border border-border shadow-lg py-1 w-56"
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={(e) => e.stopPropagation()}
         >

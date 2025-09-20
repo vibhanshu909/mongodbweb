@@ -6,6 +6,7 @@ import {
   FileText,
   Loader2,
   MoreHorizontal,
+  Database,
 } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -42,12 +43,29 @@ export function ServerExplorer() {
     serverId: string | null
   }>({ visible: false, x: 0, y: 0, serverId: null })
 
+  // Database context menu state
+  const [dbContextMenu, setDbContextMenu] = useState<{
+    visible: boolean
+    x: number
+    y: number
+    serverId: string | null
+    databaseName: string | null
+  }>({ visible: false, x: 0, y: 0, serverId: null, databaseName: null })
+
   // Create database dialog state
   const [createDbDialog, setCreateDbDialog] = useState<{
     open: boolean
     serverId: string | null
     databaseName: string
   }>({ open: false, serverId: null, databaseName: '' })
+
+  // Create collection dialog state
+  const [createCollectionDialog, setCreateCollectionDialog] = useState<{
+    open: boolean
+    serverId: string | null
+    databaseName: string | null
+    collectionName: string
+  }>({ open: false, serverId: null, databaseName: null, collectionName: '' })
 
   const {
     data: databases,
@@ -101,6 +119,13 @@ export function ServerExplorer() {
     window.addEventListener('click', onClick)
     return () => window.removeEventListener('click', onClick)
   }, [contextMenu.visible])
+
+  useEffect(() => {
+    if (!dbContextMenu.visible) return
+    const onClick = () => setDbContextMenu((c) => ({ ...c, visible: false }))
+    window.addEventListener('click', onClick)
+    return () => window.removeEventListener('click', onClick)
+  }, [dbContextMenu.visible])
 
   const toggleServer = (server: Server) => {
     if (expandedServerId === server.id) {
@@ -167,9 +192,140 @@ export function ServerExplorer() {
     setContextMenu({ visible: true, x, y, serverId })
   }
 
+  const openDbContextMenu = (
+    e: React.MouseEvent,
+    serverId: string,
+    databaseName: string
+  ) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const menuWidth = 224 // w-56 = 14rem = 224px
+    const menuHeight = 80 // approximate height for 2 items
+    let x = e.clientX
+    let y = e.clientY
+
+    // Adjust position to keep menu on screen
+    if (x + menuWidth > window.innerWidth) {
+      x = window.innerWidth - menuWidth - 10
+    }
+    if (x < 10) {
+      x = 10
+    }
+    if (y + menuHeight > window.innerHeight) {
+      y = window.innerHeight - menuHeight - 10
+    }
+    if (y < 10) {
+      y = 10
+    }
+
+    setDbContextMenu({ visible: true, x, y, serverId, databaseName })
+  }
+
   const handleAddDatabase = (serverId: string) => {
     setContextMenu((c) => ({ ...c, visible: false }))
     setCreateDbDialog({ open: true, serverId, databaseName: '' })
+  }
+
+  const handleAddCollection = (serverId: string, databaseName: string) => {
+    setDbContextMenu((c) => ({ ...c, visible: false }))
+    setCreateCollectionDialog({
+      open: true,
+      serverId,
+      databaseName,
+      collectionName: '',
+    })
+  }
+
+  const handleDeleteCollection = async (
+    serverId: string,
+    databaseName: string
+  ) => {
+    setDbContextMenu((c) => ({ ...c, visible: false }))
+
+    const collectionName = window.prompt('Enter collection name to delete:')
+    if (!collectionName?.trim()) return
+
+    const server = servers.find((s) => s.id === serverId)
+    if (!server) return
+
+    try {
+      const res = await fetch('/api/collections/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uri: server.uri,
+          database: databaseName,
+          collection: collectionName.trim(),
+        }),
+      })
+
+      const body = await res.json()
+      if (res.ok && body.success) {
+        toast({ title: 'Success', description: 'Collection deleted' })
+        // Refresh collections
+        const server = servers.find((s) => s.id === serverId)
+        if (server) {
+          loadCollections(server, databaseName)
+        }
+      } else {
+        toast({
+          title: 'Error',
+          description: body.error || 'Failed to delete collection',
+          variant: 'destructive',
+        })
+      }
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete collection',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleCreateCollection = async () => {
+    const { serverId, databaseName, collectionName } = createCollectionDialog
+    if (!serverId || !databaseName || !collectionName.trim()) return
+
+    const server = servers.find((s) => s.id === serverId)
+    if (!server) return
+
+    try {
+      const res = await fetch('/api/collections/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uri: server.uri,
+          database: databaseName,
+          collection: collectionName.trim(),
+        }),
+      })
+
+      const body = await res.json()
+      if (res.ok && body.success) {
+        toast({ title: 'Success', description: 'Collection created' })
+        setCreateCollectionDialog({
+          open: false,
+          serverId: null,
+          databaseName: null,
+          collectionName: '',
+        })
+        // Refresh collections
+        loadCollections(server, databaseName)
+      } else {
+        toast({
+          title: 'Error',
+          description: body.error || 'Failed to create collection',
+          variant: 'destructive',
+        })
+      }
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create collection',
+        variant: 'destructive',
+      })
+    }
   }
 
   const handleCreateDatabase = async () => {
@@ -287,12 +443,22 @@ export function ServerExplorer() {
                     <div key={db.name}>
                       <div className="flex items-center justify-between">
                         <button
-                          className="flex items-center gap-2 w-full text-sm text-left p-2 hover:bg-muted/50 rounded"
+                          className="flex items-center gap-2 flex-1 text-sm text-left p-2 hover:bg-muted/50 rounded"
                           onClick={() => toggleDatabase(server, db.name)}
                         >
-                          <Folder className="h-4 w-4" />
+                          <Database className="h-4 w-4" />
                           <span className="truncate">{db.name}</span>
                         </button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) =>
+                            openDbContextMenu(e, server.id, db.name)
+                          }
+                        >
+                          <MoreHorizontal className="h-3 w-3" />
+                        </Button>
                       </div>
 
                       {expandedDb[server.id] === db.name && (
@@ -335,8 +501,10 @@ export function ServerExplorer() {
       ))}
 
       {contextMenu.visible && (
+        // Use fixed positioning so the menu positions relative to the viewport
+        // (prevents parent stacking/scroll offsets from pushing it away from the pointer)
         <div
-          className="absolute z-50 bg-popover rounded-md border border-border shadow-lg py-1 w-56"
+          className="fixed z-50 bg-popover rounded-md border border-border shadow-lg py-1 w-56"
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -365,6 +533,41 @@ export function ServerExplorer() {
             }
           >
             Delete Connection
+          </button>
+        </div>
+      )}
+
+      {dbContextMenu.visible && (
+        <div
+          className="fixed z-50 bg-popover rounded-md border border-border shadow-lg py-1 w-56"
+          style={{ left: dbContextMenu.x, top: dbContextMenu.y }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm"
+            onClick={() =>
+              dbContextMenu.serverId &&
+              dbContextMenu.databaseName &&
+              handleAddCollection(
+                dbContextMenu.serverId,
+                dbContextMenu.databaseName
+              )
+            }
+          >
+            Add Collection
+          </button>
+          <button
+            className="w-full text-left px-3 py-2 hover:bg-destructive/10 text-sm text-destructive"
+            onClick={() =>
+              dbContextMenu.serverId &&
+              dbContextMenu.databaseName &&
+              handleDeleteCollection(
+                dbContextMenu.serverId,
+                dbContextMenu.databaseName
+              )
+            }
+          >
+            Delete Collection
           </button>
         </div>
       )}
@@ -424,6 +627,70 @@ export function ServerExplorer() {
               type="button"
               onClick={handleCreateDatabase}
               disabled={!createDbDialog.databaseName.trim()}
+            >
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={createCollectionDialog.open}
+        onOpenChange={(open) =>
+          setCreateCollectionDialog((prev) => ({ ...prev, open }))
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Collection</DialogTitle>
+            <DialogDescription>
+              Enter a name for the new collection in database "
+              {createCollectionDialog.databaseName}".
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="collection-name" className="text-right text-sm">
+                Name
+              </label>
+              <Input
+                id="collection-name"
+                value={createCollectionDialog.collectionName}
+                onChange={(e) =>
+                  setCreateCollectionDialog((prev) => ({
+                    ...prev,
+                    collectionName: e.target.value,
+                  }))
+                }
+                className="col-span-3"
+                placeholder="Enter collection name"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleCreateCollection()
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                setCreateCollectionDialog({
+                  open: false,
+                  serverId: null,
+                  databaseName: null,
+                  collectionName: '',
+                })
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleCreateCollection}
+              disabled={!createCollectionDialog.collectionName.trim()}
             >
               Create
             </Button>

@@ -10,16 +10,17 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  if (req.method !== 'POST') {
+  if (req.method !== 'DELETE') {
     return res.status(405).json({ success: false, error: 'Method not allowed' })
   }
 
   const { uri, database } = req.body
 
   if (!uri || !database) {
-    return res
-      .status(400)
-      .json({ success: false, error: 'uri and database are required' })
+    return res.status(400).json({
+      success: false,
+      error: 'uri and database are required',
+    })
   }
 
   // Validate database name (MongoDB naming rules)
@@ -31,29 +32,18 @@ export default async function handler(
     })
   }
 
-  if (database.length > 64) {
-    return res.status(400).json({
-      success: false,
-      error: 'Database name cannot exceed 64 characters',
-    })
-  }
-
   try {
-    // Use shared client manager to get the database
+    // Get the database
     const db = await getDb(uri, database)
 
-    // MongoDB creates databases implicitly when you first write to them
-    // We'll create a temporary document to ensure the database exists
-    const tempCollection = db.collection(database)
-    await tempCollection.insertOne({
-      created: new Date(),
-      purpose: 'database_initialization',
-    })
+    // Drop the database
+    await db.dropDatabase()
+
     return res.status(200).json({ success: true })
   } catch (error) {
-    console.error('Create database error:', error)
+    console.error('Delete database error:', error)
     const errorMessage =
-      error instanceof Error ? error.message : 'Failed to create database'
+      error instanceof Error ? error.message : 'Failed to delete database'
     return res.status(500).json({ success: false, error: errorMessage })
   }
 }
