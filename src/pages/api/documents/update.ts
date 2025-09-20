@@ -1,4 +1,5 @@
-import { MongoClient, ObjectId } from 'mongodb'
+import { ObjectId } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 type Data = {
@@ -23,10 +24,8 @@ export default async function handler(
     })
   }
 
-  const client = new MongoClient(uri)
   try {
-    await client.connect()
-    const db = client.db(database)
+    const db = await getDb(uri, database)
 
     // Remove _id from document to avoid conflicts
     const { _id, ...updateDoc } = document
@@ -35,16 +34,12 @@ export default async function handler(
       .collection(collection)
       .replaceOne({ _id: new ObjectId(id) }, updateDoc, { upsert: true })
 
-    res.status(200).json({
-      success: !!result.acknowledged,
-    })
+    res.status(200).json({ success: !!result.acknowledged })
   } catch (error) {
     console.error('Update error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to update document',
     })
-  } finally {
-    await client.close()
   }
 }

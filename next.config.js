@@ -13,6 +13,15 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
+  // Add SPA fallback for client-side routing
+  async rewrites() {
+    return [
+      {
+        source: '/((?!api|_next/static|_next/image|favicon.ico).*)',
+        destination: '/',
+      },
+    ]
+  },
   async headers() {
     return [
       {

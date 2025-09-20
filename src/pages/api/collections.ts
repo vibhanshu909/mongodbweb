@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 type Collection = {
@@ -29,10 +29,8 @@ export default async function handler(
     })
   }
 
-  const client = new MongoClient(uri)
   try {
-    await client.connect()
-    const db = client.db(database)
+    const db = await getDb(uri, database)
     const collections = await db.listCollections().toArray()
 
     const collectionsWithCount = await Promise.all(
@@ -55,7 +53,5 @@ export default async function handler(
       success: false,
       error: 'Failed to list collections',
     })
-  } finally {
-    await client.close()
   }
 }

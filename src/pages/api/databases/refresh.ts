@@ -1,14 +1,9 @@
 import { getClient } from '@/lib/mongo'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-type Database = {
-  name: string
-  empty: boolean
-}
-
 type Data = {
   success: boolean
-  data?: Database[]
+  data?: { name: string; empty: boolean }[]
   error?: string
 }
 
@@ -23,24 +18,19 @@ export default async function handler(
   const { uri } = req.body
 
   if (!uri) {
-    return res.status(400).json({ success: false, error: 'URI is required' })
+    return res.status(400).json({ success: false, error: 'uri is required' })
   }
 
-  try {
     const client = await getClient(uri)
+  try {
     const dbList = await client.db().admin().listDatabases()
     res.status(200).json({
       success: true,
-      data: dbList.databases.map((db: { name: string; empty?: boolean }) => ({
-        name: db.name,
-        empty: db.empty ?? false,
-      })),
+    data: dbList.databases.map((db: { name: string; empty?: boolean }) => ({ name: db.name, empty: db.empty ?? false })),
     })
   } catch (error) {
-    console.error('List databases error:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to list databases',
-    })
+    console.error('Refresh databases error:', error)
+    res.status(500).json({ success: false, error: 'Failed to refresh databases' })
+  } finally {
   }
 }

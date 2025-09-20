@@ -1,4 +1,5 @@
-import { MongoClient, ObjectId } from 'mongodb'
+import { ObjectId } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 type Data = {
@@ -23,24 +24,18 @@ export default async function handler(
     })
   }
 
-  const client = new MongoClient(uri)
   try {
-    await client.connect()
-    const db = client.db(database)
+    const db = await getDb(uri, database)
     const result = await db
       .collection(collection)
       .deleteMany({ _id: { $in: ids.map((id: string) => new ObjectId(id)) } })
 
-    res.status(200).json({
-      success: !!result.acknowledged,
-    })
+    res.status(200).json({ success: !!result.acknowledged })
   } catch (error) {
     console.error('Delete error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to delete documents',
     })
-  } finally {
-    await client.close()
   }
 }

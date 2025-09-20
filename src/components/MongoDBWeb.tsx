@@ -21,19 +21,22 @@ import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { useCheckServer } from '@/hooks/useApi'
 import { useAppStore } from '@/lib/store'
-import { DatabaseExplorer } from './DatabaseExplorer'
-import { ServerManager } from './ServerManager'
+import { ServerExplorer } from './ServerExplorer'
+import { CollectionViewer } from './CollectionViewer'
 import { ThemeToggle } from './ThemeToggle'
 
 export function MongoDBWeb() {
   const [connectionUri, setConnectionUri] = useState('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const { activeServer, addServer } = useAppStore()
+  const { activeServer, addServer, servers } = useAppStore()
   const { checkServer, loading } = useCheckServer()
   const { toast } = useToast()
 
   const handleAddServer = async () => {
-    if (!connectionUri.trim()) {
+    const trimmedUri = connectionUri.trim()
+
+    // Basic validation
+    if (!trimmedUri) {
       toast({
         title: 'Error',
         description: 'Please enter a MongoDB connection URI',
@@ -42,19 +45,69 @@ export function MongoDBWeb() {
       return
     }
 
+    // Basic URL format validation
+    if (
+      !trimmedUri.startsWith('mongodb://') &&
+      !trimmedUri.startsWith('mongodb+srv://')
+    ) {
+      toast({
+        title: 'Invalid URI Format',
+        description: 'MongoDB URI must start with mongodb:// or mongodb+srv://',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    // Check for duplicate URIs
+    const isDuplicate = servers.some((server) => server.uri === trimmedUri)
+    if (isDuplicate) {
+      toast({
+        title: 'Duplicate Server',
+        description: 'This MongoDB server is already added',
+        variant: 'destructive',
+      })
+      return
+    }
+
     try {
-      await checkServer(connectionUri)
-      addServer(connectionUri)
+      // call checkServer and inspect response directly
+      const res = await checkServer(trimmedUri)
+
+      // res may be undefined or null if execute returned null
+      if (!res) {
+        toast({
+          title: 'Connection Failed',
+          description: 'No response from server',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      if (!res.success) {
+        toast({
+          title: 'Connection Failed',
+          description: res.error || 'Unable to connect to the MongoDB server',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      // Success - add the server
+      addServer(trimmedUri)
       setConnectionUri('')
       setIsDialogOpen(false)
       toast({
         title: 'Success',
         description: 'Server connection added successfully',
       })
-    } catch (_error) {
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Unable to connect to the MongoDB server'
       toast({
         title: 'Connection Failed',
-        description: 'Failed to connect to the MongoDB server',
+        description: message,
         variant: 'destructive',
       })
     }
@@ -111,15 +164,16 @@ export function MongoDBWeb() {
             </DialogContent>
           </Dialog>
 
-          {/* Server List */}
-          <ServerManager />
+          {/* Merged Server + Database Explorer */}
+          <ServerExplorer />
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-auto">
         {activeServer ? (
-          <DatabaseExplorer server={activeServer} />
+          // Show only the collection viewer tabs in the main area; ServerExplorer handles the sidebar browsing
+          <CollectionViewer />
         ) : (
           <div className="flex items-center justify-center h-full">
             <Card className="w-96">

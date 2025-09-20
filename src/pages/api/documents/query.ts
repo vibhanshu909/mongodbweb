@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { type MongoDocument } from '@/types'
 
@@ -33,17 +33,19 @@ export default async function handler(
     })
   }
 
-  const client = new MongoClient(uri)
   try {
-    await client.connect()
-    const db = client.db(database)
-    const documents = await db
+    const db = await getDb(uri, database)
+    const docs = await db
       .collection(collection)
       .find(query)
       .skip(skip)
       .limit(limit)
-      .sort(sort)
+      // `sort` can be different shapes; cast to any for the driver
+      .sort(sort as any)
       .toArray()
+
+    // Normalize _id to string to match MongoDocument type
+    const documents = docs.map((d) => ({ ...d, _id: String((d as any)._id) }))
 
     res.status(200).json({
       success: true,
@@ -55,7 +57,5 @@ export default async function handler(
       success: false,
       error: 'Failed to query collection',
     })
-  } finally {
-    await client.close()
   }
 }

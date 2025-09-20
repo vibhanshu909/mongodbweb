@@ -15,7 +15,7 @@ export function useApi<T>() {
   const [error, setError] = useState<string | null>(null)
 
   const execute = useCallback(
-    async (apiCall: () => Promise<ApiResponse<T>>) => {
+    async (apiCall: () => Promise<ApiResponse<T>>): Promise<ApiResponse<T> | null> => {
       setLoading(true)
       setError(null)
 
@@ -26,8 +26,11 @@ export function useApi<T>() {
         } else {
           setError(response.error || 'Unknown error occurred')
         }
+        return response
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Network error occurred')
+        const message = err instanceof Error ? err.message : 'Network error occurred'
+        setError(message)
+        return { success: false, error: message } as ApiResponse<T>
       } finally {
         setLoading(false)
       }

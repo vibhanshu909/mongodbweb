@@ -5,10 +5,10 @@ import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { useQueryDocuments } from '@/hooks/useApi'
 import { useAppStore } from '@/lib/store'
+import { JsonViewer } from './JsonViewer'
 
 export function CollectionViewer() {
   const { tabs, activeTabId, setActiveTab, removeTab, servers } = useAppStore()
@@ -112,16 +112,27 @@ export function CollectionViewer() {
                 <div className="flex items-center justify-center h-64">
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
-              ) : (
+              ) : documents.length === 0 ? (
                 <Card>
-                  <CardContent className="p-0">
-                    <Textarea
-                      className="min-h-96 font-mono text-sm border-0 resize-none"
-                      value={JSON.stringify(documents, null, 2)}
-                      readOnly
-                    />
+                  <CardContent className="p-6">
+                    <div className="text-center text-muted-foreground">
+                      <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No documents found in this collection</p>
+                    </div>
                   </CardContent>
                 </Card>
+              ) : (
+                <div className="space-y-4">
+                  {documents.map((doc, index) => (
+                    <JsonViewer
+                      key={doc._id || index}
+                      data={doc}
+                      className="w-full"
+                      maxDepth={3}
+                      defaultExpanded={true}
+                    />
+                  ))}
+                </div>
               )}
             </div>
           </TabsContent>

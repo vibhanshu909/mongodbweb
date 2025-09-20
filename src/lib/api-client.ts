@@ -89,6 +89,7 @@ class ApiClient {
   async createDocument(
     uri: string,
     database: string,
+    collection: string,
     document: MongoDocument
   ): Promise<ApiResponse<boolean>> {
     return this.request<boolean>('/documents/create', {
