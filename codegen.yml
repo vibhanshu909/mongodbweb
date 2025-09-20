@@ -1,17 +1,19 @@
 overwrite: true
 schema: 'http://localhost:3000/api/graphql'
-documents: 'graphql/**/*.ts'
+documents: 'src/graphql/**/*.{ts,tsx}'
+watchPattern: 'src/graphql/**/*.{ts,tsx}'
 generates:
-  generated/graphql.ts:
+  src/generated/:
+    preset: 'client'
     config:
-      declarationKind: 'interface'
-      typesPrefix: I
-      noNamespaces: true
-      withHooks: true
-      withHOC: false
-      withComponent: false
-      withMutationFn: false
+      useTypeImports: true
+      enumsAsTypes: true
+      scalars:
+        DateTime: 'string'
+        JSON: 'Record<string, any>'
+  src/generated/schema.graphql:
     plugins:
-      - 'typescript'
-      - 'typescript-operations'
-      - 'typescript-react-apollo'
+      - 'schema-ast'
+  src/generated/introspection.json:
+    plugins:
+      - 'introspection'
