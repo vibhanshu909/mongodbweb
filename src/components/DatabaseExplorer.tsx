@@ -1,22 +1,11 @@
 'use client'
 
-import {
-  Database,
-  FileText,
-  Loader2,
-  Plus,
-  Edit,
-  Trash2,
-} from 'lucide-react'
+import { Database, FileText, Loader2, MoreHorizontal } from 'lucide-react'
 import { useCallback, useEffect, useId, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu'
+// Context menu primitives were replaced by a small hook; keep the UI primitives
+// import commented out in case we need to revert. (Removed because unused)
 import {
   Dialog,
   DialogContent,
@@ -36,6 +25,7 @@ import {
 } from '@/hooks/useApi'
 import { type Server, useAppStore } from '@/lib/store'
 import { CollectionViewer } from './CollectionViewer'
+import { useContextMenu } from '@/hooks/useContextMenu'
 
 interface DatabaseExplorerProps {
   server: Server
@@ -117,6 +107,9 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
       addTab(server.id, selectedDatabase, collection)
     }
   }
+
+  const { state: contextMenu, open: openContextMenu, close: closeContextMenu } =
+    useContextMenu<{ database?: string }>()
 
   const handleCreateCollection = useCallback(
     async (database: string, collectionName: string) => {
@@ -211,64 +204,90 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
           ) : (
             <div className="space-y-2">
               {databases.map((db) => (
-                <ContextMenu key={db.name}>
-                  <ContextMenuTrigger>
-                    <Card
-                      className={`cursor-pointer transition-colors ${
-                        selectedDatabase === db.name
-                          ? 'border-primary bg-primary/5'
-                          : 'hover:bg-muted/50'
-                      }`}
-                      onClick={() => setSelectedDatabase(db.name)}
-                    >
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm flex items-center gap-2">
-                          <Database className="h-4 w-4" />
-                          {db.name}
-                        </CardTitle>
-                      </CardHeader>
-                    </Card>
-                  </ContextMenuTrigger>
-                  <ContextMenuContent>
-                    <ContextMenuItem
-                      onClick={() =>
-                        setCreateCollectionDialog({
-                          open: true,
-                          database: db.name,
-                        })
-                      }
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Collection
-                    </ContextMenuItem>
-                    <ContextMenuItem
-                      onClick={() =>
-                        setRenameDatabaseDialog({
-                          open: true,
-                          database: db.name,
-                        })
-                      }
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Rename Database
-                    </ContextMenuItem>
-                    <ContextMenuItem
-                      onClick={() =>
-                        setDeleteDatabaseDialog({
-                          open: true,
-                          database: db.name,
-                        })
-                      }
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete Database
-                    </ContextMenuItem>
-                  </ContextMenuContent>
-                </ContextMenu>
+                <div key={db.name} className="relative">
+                  <Card
+                    className={`cursor-pointer transition-colors ${
+                      selectedDatabase === db.name
+                        ? 'border-primary bg-primary/5'
+                        : 'hover:bg-muted/50'
+                    }`}
+                    onClick={() => setSelectedDatabase(db.name)}
+                  >
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Database className="h-4 w-4" />
+                        {db.name}
+                        <div className="ml-auto">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={(e: React.MouseEvent<HTMLElement>) =>
+                              openContextMenu(e, {
+                                width: 224,
+                                height: 120,
+                                data: { database: db.name },
+                              })
+                            }
+                          >
+                            <MoreHorizontal className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                  </Card>
+                </div>
               ))}
             </div>
           )}
+
+            {contextMenu.visible && (
+              <div
+                role="menu"
+                tabIndex={-1}
+                onKeyDown={(e) => {
+                  // close on Escape
+                  if (e.key === 'Escape') {
+                    e.stopPropagation()
+                    closeContextMenu()
+                  }
+                }}
+                className="fixed z-50 bg-popover rounded-md border border-border shadow-lg py-1 w-56"
+                style={{ left: contextMenu.x, top: contextMenu.y }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  className="w-full text-left px-3 py-2 hover:bg-accent/10 text-sm"
+                  onClick={() => {
+                    setCreateCollectionDialog({ open: true, database: contextMenu.data?.database || '' })
+                    closeContextMenu()
+                  }}
+                >
+                  Create Collection
+                </button>
+                <button
+                  type="button"
+                  className="w-full text-left px-3 py-2 hover:bg-muted/10 text-sm"
+                  onClick={() => {
+                    setRenameDatabaseDialog({ open: true, database: contextMenu.data?.database || '' })
+                    closeContextMenu()
+                  }}
+                >
+                  Rename Database
+                </button>
+                <button
+                  type="button"
+                  className="w-full text-left px-3 py-2 hover:bg-destructive/10 text-sm text-destructive"
+                  onClick={() => {
+                    setDeleteDatabaseDialog({ open: true, database: contextMenu.data?.database || '' })
+                    closeContextMenu()
+                  }}
+                >
+                  Delete Database
+                </button>
+              </div>
+            )}
 
           {selectedDatabase && (
             <div className="pt-4 border-t">
@@ -329,7 +348,7 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="collection-name" className="text-right">
+              <label htmlFor={collectionId} className="text-right">
                 Name
               </label>
               <Input
@@ -343,7 +362,7 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
           </div>
           <DialogFooter>
             <Button
-              type="submit"
+              type="button"
               onClick={() => {
                 if (collectionName.trim()) {
                   handleCreateCollection(
@@ -380,7 +399,7 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="database-name" className="text-right">
+              <label htmlFor={databaseId} className="text-right">
                 Name
               </label>
               <Input
@@ -394,7 +413,7 @@ export function DatabaseExplorer({ server }: DatabaseExplorerProps) {
           </div>
           <DialogFooter>
             <Button
-              type="submit"
+              type="button"
               onClick={() => {
                 if (newDatabaseName.trim()) {
                   handleRenameDatabase(

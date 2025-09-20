@@ -1,68 +1,29 @@
-'use client'
+"use client"
 
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Database, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { useContextMenu } from '@/hooks/useContextMenu'
 
 export function ServerManager() {
   const { servers, activeServer, setActiveServer, removeServer } = useAppStore()
   const { toast } = useToast()
 
   // Context menu state
-  const [contextMenu, setContextMenu] = useState<{
-    visible: boolean
-    x: number
-    y: number
-    serverId: string | null
-  }>({ visible: false, x: 0, y: 0, serverId: null })
-
-  const openContextMenu = (e: React.MouseEvent, serverId: string) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const menuWidth = 224 // w-56 = 14rem = 224px
-    const menuHeight = 40 // approximate height for 1 item
-
-    let x = e.clientX
-    let y = e.clientY
-
-    const target = e.currentTarget as HTMLElement
-    if (target && typeof target.getBoundingClientRect === 'function') {
-      const rect = target.getBoundingClientRect()
-      // Place menu so its right edge aligns with trigger's right edge,
-      // and offset slightly downwards.
-      x = rect.left + rect.width - menuWidth
-      y = rect.top + rect.height + 8
-    }
-
-    // Adjust position to keep menu on screen
-    if (x + menuWidth > window.innerWidth) {
-      x = window.innerWidth - menuWidth - 10
-    }
-    if (x < 10) x = 10
-    if (y + menuHeight > window.innerHeight) {
-      y = window.innerHeight - menuHeight - 10
-    }
-    if (y < 10) y = 10
-
-    setContextMenu({ visible: true, x, y, serverId })
-  }
+  const { state: contextMenu, open: openContextMenu, close: closeContextMenu } =
+    useContextMenu<{ serverId?: string }>()
 
   const handleDeleteConnection = (serverId: string) => {
     removeServer(serverId)
     toast({ title: 'Deleted', description: 'Server connection removed' })
-    setContextMenu((c) => ({ ...c, visible: false }))
+    closeContextMenu()
   }
 
-  useEffect(() => {
-    if (!contextMenu.visible) return
-    const onClick = () => setContextMenu((c) => ({ ...c, visible: false }))
-    window.addEventListener('click', onClick)
-    return () => window.removeEventListener('click', onClick)
-  }, [contextMenu.visible])
+  // useContextMenu already manages the global click listener
 
   if (servers.length === 0) {
     return (
@@ -104,7 +65,13 @@ export function ServerManager() {
                 variant="ghost"
                 size="sm"
                 className="h-6 w-6 p-0"
-                onClick={(e) => openContextMenu(e, server.id)}
+                onClick={(e: React.MouseEvent<HTMLElement>) =>
+                  openContextMenu(e, {
+                    width: 224,
+                    height: 40,
+                    data: { serverId: server.id },
+                  })
+                }
               >
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
@@ -119,19 +86,29 @@ export function ServerManager() {
       ))}
 
       {contextMenu.visible && (
-        // Use fixed positioning so the menu positions relative to the viewport
-        // (prevents parent stacking/scroll offsets from pushing it away from the pointer)
         <div
+          role="menu"
+          tabIndex={-1}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.stopPropagation()
+              closeContextMenu()
+            }
+          }}
           className="fixed z-50 bg-popover rounded-md border border-border shadow-lg py-1 w-56"
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
+            type="button"
             className="w-full text-left px-3 py-2 hover:bg-destructive/10 text-sm text-destructive"
-            onClick={() =>
-              contextMenu.serverId &&
-              handleDeleteConnection(contextMenu.serverId)
-            }
+            onClick={() => {
+              const serverId = contextMenu.data?.serverId as string | undefined
+              if (serverId) {
+                handleDeleteConnection(serverId)
+              }
+              closeContextMenu()
+            }}
           >
             Delete Connection
           </button>

@@ -9,8 +9,11 @@ import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 const ReactJson = dynamic(() => import('react-json-view'), { ssr: false })
 
+type JsonPrimitive = string | number | boolean | null
+type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue }
+
 interface JsonViewerProps {
-  data: any
+  data: JsonValue
   className?: string
   maxDepth?: number
   defaultExpanded?: boolean
@@ -34,7 +37,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
         title: 'Copied!',
         description: 'Full JSON copied to clipboard',
       })
-    } catch (err) {
+    } catch (_err) {
       // fallback for circular refs
       navigator.clipboard.writeText(String(data))
       toast({ title: 'Copied!', description: 'Copied (string fallback)' })
@@ -44,7 +47,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
   const filteredData = useMemo(() => {
     if (!searchTerm) return data
 
-    const filterObject = (obj: any): any => {
+    const filterObject = (obj: JsonValue): JsonValue | undefined => {
       if (obj === null || typeof obj !== 'object') {
         return String(obj).toLowerCase().includes(searchTerm.toLowerCase())
           ? obj
@@ -53,19 +56,19 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 
       if (Array.isArray(obj)) {
         const filtered = obj
-          .map(filterObject)
-          .filter((item) => item !== undefined)
+          .map((v) => filterObject(v))
+          .filter((item): item is JsonValue => item !== undefined)
         return filtered.length > 0 ? filtered : undefined
       }
 
-      const filtered: any = {}
+      const filtered: { [key: string]: JsonValue } = {}
       for (const [key, value] of Object.entries(obj)) {
-        const filteredValue = filterObject(value)
+        const filteredValue = filterObject(value as JsonValue)
         if (
           filteredValue !== undefined ||
           key.toLowerCase().includes(searchTerm.toLowerCase())
         ) {
-          filtered[key] = value
+          filtered[key] = value as JsonValue
         }
       }
       return Object.keys(filtered).length > 0 ? filtered : undefined
@@ -120,9 +123,11 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 
       <div className="p-3 max-h-96 overflow-auto font-mono text-sm">
         {filteredData !== undefined ? (
-          // @ts-ignore react-json-view typing is a bit loose; dynamic import helps
-          <ReactJson
-            src={filteredData}
+          (typeof filteredData === 'object' && filteredData !== null) ? (
+            // react-json-view expects an object/array
+            // @ts-expect-error - react-json-view typings are loose for dynamic import
+            <ReactJson
+              src={filteredData as object}
             name={null}
             collapsed={defaultExpanded ? false : maxDepth}
             collapseStringsAfterLength={120}
@@ -134,6 +139,9 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
               fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
             }}
           />
+          ) : (
+            <pre className="text-sm">{String(filteredData)}</pre>
+          )
         ) : (
           <div className="text-center text-muted-foreground py-8">
             No results found for "{searchTerm}"

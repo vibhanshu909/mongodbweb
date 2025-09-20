@@ -1,14 +1,13 @@
 'use client'
 
 import {
-  Folder,
   Server as ServerIcon,
   FileText,
   Loader2,
   MoreHorizontal,
   Database,
 } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState, useId } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -24,6 +23,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useListCollections, useListDatabases } from '@/hooks/useApi'
 import { type Server, useAppStore } from '@/lib/store'
 import { cn } from '@/lib/utils'
+import { useContextMenu } from '@/hooks/useContextMenu'
 
 export function ServerExplorer() {
   const { servers, activeServer, setActiveServer, removeServer, addTab } =
@@ -35,22 +35,20 @@ export function ServerExplorer() {
     {}
   )
 
-  // Context menu state
-  const [contextMenu, setContextMenu] = useState<{
-    visible: boolean
-    x: number
-    y: number
-    serverId: string | null
-  }>({ visible: false, x: 0, y: 0, serverId: null })
+  // context menus (server-level and database-level)
+  const {
+    state: contextMenu,
+    open: openContextMenu,
+    close: closeContextMenu,
+  } = useContextMenu<{ serverId?: string }>()
+  const {
+    state: dbContextMenu,
+    open: openDbContextMenu,
+    close: closeDbContextMenu,
+  } = useContextMenu<{ serverId?: string; databaseName?: string }>()
 
-  // Database context menu state
-  const [dbContextMenu, setDbContextMenu] = useState<{
-    visible: boolean
-    x: number
-    y: number
-    serverId: string | null
-    databaseName: string | null
-  }>({ visible: false, x: 0, y: 0, serverId: null, databaseName: null })
+  const databaseNameInputId = useId()
+  const collectionNameInputId = useId()
 
   // Create database dialog state
   const [createDbDialog, setCreateDbDialog] = useState<{
@@ -109,23 +107,12 @@ export function ServerExplorer() {
     [listCollections, toast]
   )
 
-  useEffect(() => {
-    // Reset loaded collections when server changes
-  }, [servers])
+  // NOTE: resetting expanded state when servers list changes was removed
+  // because it caused an unnecessary hook dependency warning. If a reset
+  // is required when servers change, add explicit logic here that uses
+  // `servers` so the dependency is intentional.
 
-  useEffect(() => {
-    if (!contextMenu.visible) return
-    const onClick = () => setContextMenu((c) => ({ ...c, visible: false }))
-    window.addEventListener('click', onClick)
-    return () => window.removeEventListener('click', onClick)
-  }, [contextMenu.visible])
-
-  useEffect(() => {
-    if (!dbContextMenu.visible) return
-    const onClick = () => setDbContextMenu((c) => ({ ...c, visible: false }))
-    window.addEventListener('click', onClick)
-    return () => window.removeEventListener('click', onClick)
-  }, [dbContextMenu.visible])
+  // useContextMenu handles global click-to-close behavior
 
   const toggleServer = (server: Server) => {
     if (expandedServerId === server.id) {
@@ -155,79 +142,17 @@ export function ServerExplorer() {
     addTab(serverId, dbName, collectionName)
   }
 
-  const openContextMenu = (e: React.MouseEvent, serverId: string) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const menuWidth = 224 // w-56 = 14rem = 224px
-    const menuHeight = 120 // approximate height for 3 items
+  // useContextMenu provides open/close helpers instead of manual positioning
 
-    // Prefer anchoring to the clicked element (options icon). If that's not
-    // available, fall back to the mouse coordinates.
-    let x = e.clientX
-    let y = e.clientY
-
-    const target = e.currentTarget as HTMLElement
-    if (target && typeof target.getBoundingClientRect === 'function') {
-      const rect = target.getBoundingClientRect()
-      // Align menu right edge with the trigger element's right edge and
-      // place it slightly below the element.
-      x = rect.left + rect.width - menuWidth
-      y = rect.top + rect.height + 8
-    }
-
-    // Adjust position to keep menu on screen
-    if (x + menuWidth > window.innerWidth) {
-      x = window.innerWidth - menuWidth - 10
-    }
-    if (x < 10) {
-      x = 10
-    }
-    if (y + menuHeight > window.innerHeight) {
-      y = window.innerHeight - menuHeight - 10
-    }
-    if (y < 10) {
-      y = 10
-    }
-
-    setContextMenu({ visible: true, x, y, serverId })
-  }
-
-  const openDbContextMenu = (
-    e: React.MouseEvent,
-    serverId: string,
-    databaseName: string
-  ) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const menuWidth = 224 // w-56 = 14rem = 224px
-    const menuHeight = 80 // approximate height for 2 items
-    let x = e.clientX
-    let y = e.clientY
-
-    // Adjust position to keep menu on screen
-    if (x + menuWidth > window.innerWidth) {
-      x = window.innerWidth - menuWidth - 10
-    }
-    if (x < 10) {
-      x = 10
-    }
-    if (y + menuHeight > window.innerHeight) {
-      y = window.innerHeight - menuHeight - 10
-    }
-    if (y < 10) {
-      y = 10
-    }
-
-    setDbContextMenu({ visible: true, x, y, serverId, databaseName })
-  }
+  // db context menu is opened via the hook
 
   const handleAddDatabase = (serverId: string) => {
-    setContextMenu((c) => ({ ...c, visible: false }))
+    closeContextMenu()
     setCreateDbDialog({ open: true, serverId, databaseName: '' })
   }
 
   const handleAddCollection = (serverId: string, databaseName: string) => {
-    setDbContextMenu((c) => ({ ...c, visible: false }))
+    closeDbContextMenu()
     setCreateCollectionDialog({
       open: true,
       serverId,
@@ -240,7 +165,7 @@ export function ServerExplorer() {
     serverId: string,
     databaseName: string
   ) => {
-    setDbContextMenu((c) => ({ ...c, visible: false }))
+    closeDbContextMenu()
 
     const collectionName = window.prompt('Enter collection name to delete:')
     if (!collectionName?.trim()) return
@@ -274,7 +199,7 @@ export function ServerExplorer() {
           variant: 'destructive',
         })
       }
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: 'Error',
         description: 'Failed to delete collection',
@@ -319,7 +244,7 @@ export function ServerExplorer() {
           variant: 'destructive',
         })
       }
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: 'Error',
         description: 'Failed to create collection',
@@ -356,7 +281,7 @@ export function ServerExplorer() {
           variant: 'destructive',
         })
       }
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: 'Error',
         description: 'Failed to create database',
@@ -369,14 +294,14 @@ export function ServerExplorer() {
     const server = servers.find((s) => s.id === serverId)
     if (!server) return
     loadDatabases(server)
-    setContextMenu((c) => ({ ...c, visible: false }))
+    closeContextMenu()
   }
 
   const handleDeleteConnection = (serverId: string) => {
     // remove from store
     removeServer(serverId)
     toast({ title: 'Deleted', description: 'Server connection removed' })
-    setContextMenu((c) => ({ ...c, visible: false }))
+    closeContextMenu()
   }
 
   if (servers.length === 0) {
@@ -412,6 +337,7 @@ export function ServerExplorer() {
               <div className="flex items-center gap-2">
                 <ServerIcon className="h-4 w-4" />
                 <button
+                  type="button"
                   className="text-left truncate"
                   onClick={() => toggleServer(server)}
                 >
@@ -423,7 +349,13 @@ export function ServerExplorer() {
                   variant="ghost"
                   size="sm"
                   className="h-6 w-6 p-0"
-                  onClick={(e) => openContextMenu(e, server.id)}
+                  onClick={(e) =>
+                    openContextMenu(e as React.MouseEvent, {
+                      width: 224,
+                      height: 120,
+                      data: { serverId: server.id },
+                    })
+                  }
                 >
                   <MoreHorizontal className="h-3 w-3" />
                 </Button>
@@ -443,20 +375,25 @@ export function ServerExplorer() {
                     <div key={db.name}>
                       <div className="flex items-center justify-between">
                         <button
+                          type="button"
                           className="flex items-center gap-2 flex-1 text-sm text-left p-2 hover:bg-muted/50 rounded"
                           onClick={() => toggleDatabase(server, db.name)}
                         >
                           <Database className="h-4 w-4" />
                           <span className="truncate">{db.name}</span>
                         </button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) =>
-                            openDbContextMenu(e, server.id, db.name)
-                          }
-                        >
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={(e: React.MouseEvent<HTMLElement>) =>
+                                    openDbContextMenu(e, {
+                                      width: 224,
+                                      height: 80,
+                                      data: { serverId: server.id, databaseName: db.name },
+                                    })
+                                  }
+                                >
                           <MoreHorizontal className="h-3 w-3" />
                         </Button>
                       </div>
@@ -500,36 +437,44 @@ export function ServerExplorer() {
         </Card>
       ))}
 
-      {contextMenu.visible && (
+  {contextMenu.visible && (
         // Use fixed positioning so the menu positions relative to the viewport
         // (prevents parent stacking/scroll offsets from pushing it away from the pointer)
         <div
+          role="menu"
+          tabIndex={-1}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') closeContextMenu()
+          }}
           className="fixed z-50 bg-popover rounded-md border border-border shadow-lg py-1 w-56"
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
+            type="button"
             className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm"
             onClick={() =>
-              contextMenu.serverId && handleAddDatabase(contextMenu.serverId)
+              contextMenu.data?.serverId && handleAddDatabase(contextMenu.data.serverId)
             }
           >
             Add Database
           </button>
           <button
+            type="button"
             className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm"
             onClick={() =>
-              contextMenu.serverId &&
-              handleRefreshConnection(contextMenu.serverId)
+              contextMenu.data?.serverId &&
+              handleRefreshConnection(contextMenu.data.serverId)
             }
           >
             Refresh Connection
           </button>
           <button
+            type="button"
             className="w-full text-left px-3 py-2 hover:bg-destructive/10 text-sm text-destructive"
             onClick={() =>
-              contextMenu.serverId &&
-              handleDeleteConnection(contextMenu.serverId)
+              contextMenu.data?.serverId &&
+              handleDeleteConnection(contextMenu.data.serverId)
             }
           >
             Delete Connection
@@ -539,31 +484,38 @@ export function ServerExplorer() {
 
       {dbContextMenu.visible && (
         <div
+          role="menu"
+          tabIndex={-1}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') closeDbContextMenu()
+          }}
           className="fixed z-50 bg-popover rounded-md border border-border shadow-lg py-1 w-56"
           style={{ left: dbContextMenu.x, top: dbContextMenu.y }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
+            type="button"
             className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm"
             onClick={() =>
-              dbContextMenu.serverId &&
-              dbContextMenu.databaseName &&
-              handleAddCollection(
-                dbContextMenu.serverId,
-                dbContextMenu.databaseName
-              )
-            }
+                dbContextMenu.data?.serverId &&
+                dbContextMenu.data?.databaseName &&
+                handleAddCollection(
+                  dbContextMenu.data.serverId,
+                  dbContextMenu.data.databaseName
+                )
+              }
           >
             Add Collection
           </button>
           <button
+            type="button"
             className="w-full text-left px-3 py-2 hover:bg-destructive/10 text-sm text-destructive"
             onClick={() =>
-              dbContextMenu.serverId &&
-              dbContextMenu.databaseName &&
+              dbContextMenu.data?.serverId &&
+              dbContextMenu.data?.databaseName &&
               handleDeleteCollection(
-                dbContextMenu.serverId,
-                dbContextMenu.databaseName
+                dbContextMenu.data.serverId,
+                dbContextMenu.data.databaseName
               )
             }
           >
@@ -587,11 +539,11 @@ export function ServerExplorer() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="database-name" className="text-right text-sm">
+              <label htmlFor={databaseNameInputId} className="text-right text-sm">
                 Name
               </label>
               <Input
-                id="database-name"
+                id={databaseNameInputId}
                 value={createDbDialog.databaseName}
                 onChange={(e) =>
                   setCreateDbDialog((prev) => ({
@@ -650,11 +602,11 @@ export function ServerExplorer() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="collection-name" className="text-right text-sm">
+              <label htmlFor={collectionNameInputId} className="text-right text-sm">
                 Name
               </label>
               <Input
-                id="collection-name"
+                id={collectionNameInputId}
                 value={createCollectionDialog.collectionName}
                 onChange={(e) =>
                   setCreateCollectionDialog((prev) => ({

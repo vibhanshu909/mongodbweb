@@ -18,7 +18,11 @@ declare global {
   var __mongo_clients__: Map<string, ClientEntry> | undefined
 }
 
-const clients: Map<string, ClientEntry> = globalThis.__mongo_clients__ ||= new Map()
+// Avoid assignment-in-expression which some linters flag as confusing.
+if (!globalThis.__mongo_clients__) {
+  globalThis.__mongo_clients__ = new Map()
+}
+const clients: Map<string, ClientEntry> = globalThis.__mongo_clients__ as Map<string, ClientEntry>
 
 function touch(key: string) {
   const entry = clients.get(key)

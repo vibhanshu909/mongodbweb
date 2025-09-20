@@ -1,4 +1,5 @@
 import { getDb } from '@/lib/mongo'
+import type { Sort } from 'mongodb'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { type MongoDocument } from '@/types'
 
@@ -40,12 +41,15 @@ export default async function handler(
       .find(query)
       .skip(skip)
       .limit(limit)
-      // `sort` can be different shapes; cast to any for the driver
-      .sort(sort as any)
+  // Cast to the driver's Sort type
+  .sort(sort as Sort)
       .toArray()
 
     // Normalize _id to string to match MongoDocument type
-    const documents = docs.map((d) => ({ ...d, _id: String((d as any)._id) }))
+    const documents = docs.map((d) => {
+      const { _id } = d as { _id?: unknown }
+      return { ...d, _id: String(_id) }
+    })
 
     res.status(200).json({
       success: true,

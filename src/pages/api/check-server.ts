@@ -39,31 +39,35 @@ export default async function handler(
     // simple sanity check - list databases
     await client.db().admin().listDatabases()
     return res.status(200).json({ success: true })
-  } catch (error: any) {
-    console.error('Connection error:', error?.message || error)
+  } catch (error: unknown) {
+    // Narrow unknown to provide safe messaging
+    const errMsg =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? // @ts-expect-error - readonly access to possible message
+          (error as { message?: unknown }).message
+        : String(error)
+    console.error('Connection error:', errMsg)
 
     // Map some common error cases to friendlier messages
     let message = 'Failed to connect to server'
-    if (error && typeof error.message === 'string') {
-      if (error.message.includes('authentication failed')) {
-        message = 'Authentication failed: please check credentials'
-      } else if (error.message.includes('ENOTFOUND') || error.message.includes('getaddrinfo')) {
-        message = 'Host not found: please check hostname in the URI'
-      } else if (error.message.includes('timed out') || error.message.includes('Server selection')) {
-        message = 'Connection timed out: server may be unreachable'
-      } else {
-        // include original message for other cases
-        message = error.message
-      }
+    const text = String(errMsg || '')
+    if (text.includes('authentication failed')) {
+      message = 'Authentication failed: please check credentials'
+    } else if (text.includes('ENOTFOUND') || text.includes('getaddrinfo')) {
+      message = 'Host not found: please check hostname in the URI'
+    } else if (text.includes('timed out') || text.includes('Server selection')) {
+      message = 'Connection timed out: server may be unreachable'
+    } else if (text) {
+      message = text
     }
 
     return res.status(400).json({ success: false, error: message })
-  } finally {
-    try {
-      // remove the probe client from cache and close it
-      await closeUri(uri, options)
-    } catch (e) {
-      // ignore close errors
+    } finally {
+      try {
+        // remove the probe client from cache and close it
+        await closeUri(uri, options)
+      } catch (_e) {
+        // ignore close errors
+      }
     }
-  }
 }
